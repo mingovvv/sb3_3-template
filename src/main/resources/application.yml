@@ -1,0 +1,57 @@
+spring:
+  profiles:
+    active: local
+
+  application:
+    name: template
+
+  flyway:
+    enabled: false
+
+  jpa:
+    hibernate:
+      naming:
+        implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyJpaCompliantImpl # 암시적 네이밍 전략
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl # 물리적 네이밍 전략
+      ddl-auto: validate
+    properties:
+      hibernate:
+        query.in_clause_parameter_padding: true
+        default_batch_fetch_size: 50
+        globally_quoted_identifiers: true
+        globally_quoted_identifiers_skip_column_definitions: true
+        format_sql: false
+        show_sql: false
+        use_sql_comments: false
+        jmx.enabled: true
+    open-in-view: false
+
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: Asia/Seoul
+
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 100MB
+      max-request-size: 100MB
+
+server:
+  tomcat:
+    uri-encoding: UTF-8
+    threads:
+      min-spare: 10
+      max: 400
+    remoteIp:
+      protocol-header: x-forwarded-proto
+      remote-ip-header: x-forwarded-for
+  port: 8080
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: method
+

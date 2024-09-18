@@ -1,0 +1,32 @@
+spring:
+  config:
+    activate:
+      on-profile: dev
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    url: url
+    username: username
+    password: password
+    driver-class-name:
+    hikari:
+      pool-name: template-datasource
+      auto-commit: false
+      connection-timeout: 3000
+      maximum-pool-size: 50
+      minimum-idle: 10
+      idle-timeout: 50000
+      max-lifetime: 60000
+  jpa:
+    properties:
+      hibernate:
+        default_schema: admin
+    hibernate:
+      ddl-auto: validate
+#  autoconfigure:
+#    exclude: org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+
+logging:
+  config: classpath:logback-dev.xml
+
+aes:
+  secret-key: 4e6f0d8e28d0f2fa74e6c6d8e38a9f6b
