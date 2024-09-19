@@ -13,7 +13,7 @@ import java.util.Map;
 
 @Slf4j
 public class RestClientBuilder {
-
+    // test
     public static final Duration DEFAULT_CONNECTION_TIMEOUT_DURATION = Duration.ofMillis(1000L);
     public static final Duration DEFAULT_READ_TIMEOUT_DURATION = Duration.ofMillis(5000L);
 
