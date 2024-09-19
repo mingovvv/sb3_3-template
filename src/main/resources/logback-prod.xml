@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
 
-    <property name="LOG_PATH" value="./LOG/chatbot-admin" />
-    <property name="LOG_FILE_NAME" value="chatbot-admin_prd" />
+    <property name="LOG_PATH" value="./LOG/template" />
+    <property name="LOG_FILE_NAME" value="template_prod" />
     <property name="LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] [%-5p] [%method:%line] [uuid=%mdc{REQUEST_UUID:-N/A}] - %msg%n" />
     <property name="TIMEZONE" value="Asia/Seoul" />
     <property name="LOG_LEVEL" value="INFO"/>

@@ -13,11 +13,13 @@ public class AuditorAwareCustom implements AuditorAware<String> {
     @Override
     public Optional<String> getCurrentAuditor() {
 
-        if (Objects.nonNull(MDCUtil.getValue(MDCUtil.REQUEST_USER_ID))) {
-            return Optional.of(MDCUtil.getValue(MDCUtil.REQUEST_USER_ID));
-        } else {
-            return Optional.empty();
-        }
+//        if (Objects.nonNull(MDCUtil.getValue(MDCUtil.REQUEST_USER_ID))) {
+//            return Optional.of(MDCUtil.getValue(MDCUtil.REQUEST_USER_ID));
+//        } else {
+//            return Optional.empty();
+//        }
+
+        return Optional.of("mgjang");
 
     }
 

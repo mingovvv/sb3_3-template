@@ -8,6 +8,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.util.ContentCachingRequestWrapper;
@@ -15,41 +19,54 @@ import org.springframework.web.util.ContentCachingResponseWrapper;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @Slf4j
 @Component
 public class HttpLoggingFilter extends OncePerRequestFilter {
 
-    private final List<String> returnUri = List.of("/favicon.ico");
+    private final SessionHistoryCreation sessionHistoryCreation;
+
+    private final List<String> returnUri = List.of("/favicon.ico", "/invalid-session");
     private final List<String> excludeUri = List.of("");
     private final AtomicLong id = new AtomicLong(0);
+
+    public HttpLoggingFilter(SessionHistoryCreation sessionHistoryCreation) {
+        this.sessionHistoryCreation = sessionHistoryCreation;
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
-        // header 출력 제외처리
-//        Enumeration<String> headerNames = request.getHeaderNames();
-//
-//        while (headerNames.hasMoreElements()) {
-//            String headerName = headerNames.nextElement();
-//            String headerValue = request.getHeader(headerName);
-//            log.info("Header: {}={}", headerName, headerValue);
-//        }
+        Enumeration<String> headerNames = request.getHeaderNames();
+
+        while (headerNames.hasMoreElements()) {
+            String headerName = headerNames.nextElement();
+            String headerValue = request.getHeader(headerName);
+            log.info("Header: {}={}", headerName, headerValue);
+        }
 
         if (returnUri.stream().anyMatch(uri -> request.getRequestURI().startsWith(uri))) {
             return;
         }
 
-        if (excludeUri.stream().anyMatch(uri -> request.getRequestURI().startsWith(uri)) || excludeUrlValidation(request.getRequestURI())) {
+
+        Authentication authentication = new UsernamePasswordAuthenticationToken(
+                "{user-name}", null, Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER")));
+
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        // todo Channel Filter
+        if (excludeUri.stream().anyMatch(uri -> request.getRequestURI().startsWith(uri))) {
 
             initializeMDC(request);
             logRequest(request);
 
             try {
+                sessionHistoryCreation.createSessionHistory(request.getSession());
                 filterChain.doFilter(request, response);
             } finally {
                 logResponse();
@@ -65,6 +82,7 @@ public class HttpLoggingFilter extends OncePerRequestFilter {
             logRequest(cachingRequestWrapper);
 
             try {
+                sessionHistoryCreation.createSessionHistory(request.getSession());
                 filterChain.doFilter(cachingRequestWrapper, cachingResponseWrapper);
             } finally {
                 logResponse(cachingResponseWrapper);
@@ -167,13 +185,6 @@ public class HttpLoggingFilter extends OncePerRequestFilter {
 
         log.info("res uri={}, totalTime={}", uri, System.currentTimeMillis() - startTime);
 
-    }
-
-    private boolean excludeUrlValidation(String url) {
-        log.info("url: {}", url);
-        Pattern pattern = Pattern.compile("^/v1/admin/user/[^/]+/conversation/[^/]+/counsel$");
-        Matcher matcher = pattern.matcher(url);
-        return matcher.find();
     }
 
 }

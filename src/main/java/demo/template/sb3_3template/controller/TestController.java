@@ -11,4 +11,14 @@ public class TestController {
         return "ok";
     }
 
+    @GetMapping("/valid-session")
+    public String validSession() {
+        return "/valid-session";
+    }
+
+    @GetMapping("/invalid-session")
+    public String invalidSession() {
+        return "/invalid-session";
+    }
+
 }

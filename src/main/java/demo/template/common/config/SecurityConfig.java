@@ -1,5 +1,7 @@
 package demo.template.common.config;
 
+import demo.template.common.filter.HttpLoggingFilter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -9,92 +11,75 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter;
+import org.springframework.security.web.session.ForceEagerSessionCreationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.session.web.http.SessionRepositoryFilter;
 
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
-//    private final HttpLoggingFilter httpLoggingFilter;
-//    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
-//    private final CustomAccessDeniedHandler customAccessDeniedHandler;
-//
-//    public SecurityConfig(HttpLoggingFilter httpLoggingFilter, CustomAuthenticationEntryPoint customAuthenticationEntryPoint, CustomAccessDeniedHandler customAccessDeniedHandler) {
-//        this.httpLoggingFilter = httpLoggingFilter;
-//        this.customAuthenticationEntryPoint = customAuthenticationEntryPoint;
-//        this.customAccessDeniedHandler = customAccessDeniedHandler;
-//    }
+    private final HttpLoggingFilter httpLoggingFilter;
 
-//    @Bean
-//    public PasswordEncoder passwordEncoder() {
-//        return new BCryptPasswordEncoder();
-//    }
-//
-//    @Bean
-//    public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
-//        httpSecurity
-//                .httpBasic(AbstractHttpConfigurer::disable)
-//                .formLogin(AbstractHttpConfigurer::disable)
-//                .csrf(AbstractHttpConfigurer::disable)
-////                .sessionManagement(configurer -> configurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-//                .authorizeHttpRequests(authorize ->
-//                        authorize
-//                                .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
-//                                .requestMatchers("/swagger-ui/**", "/api-docs/**").permitAll()
-////                                .requestMatchers(HttpMethod.PATCH, "/v1/admin/rpa").permitAll() // dex -> admin
-////                                .requestMatchers(HttpMethod.PATCH, "/v1/admin/manual").permitAll() // planner, rag -> admin
-////                                .requestMatchers(HttpMethod.POST, "/v1/admin/manuals").permitAll() // planner -> admin
-////                                .requestMatchers(HttpMethod.GET, "/v1/admin/user/*/conversation/*").permitAll() // rag -> admin
-//                                .anyRequest().permitAll()
-//                );
-////                .exceptionHandling(authenticationManager -> authenticationManager
-////                        .authenticationEntryPoint(customAuthenticationEntryPoint)
-////                        .accessDeniedHandler(customAccessDeniedHandler))
-////                .addFilterBefore(httpLoggingFilter, WebAsyncManagerIntegrationFilter.class);
-//
-//        return httpSecurity.build();
-//    }
+    public SecurityConfig(HttpLoggingFilter httpLoggingFilter) {
+        this.httpLoggingFilter = httpLoggingFilter;
+    }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 
-        http
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
+        httpSecurity
                 .csrf(AbstractHttpConfigurer::disable)
-                .formLogin(Customizer.withDefaults())
-                .authorizeHttpRequests(authorizeRequest ->
-                        authorizeRequest
-                                .requestMatchers(
-                                        AntPathRequestMatcher.antMatcher("/auth/**")
-                                ).authenticated()
-                                .requestMatchers(
-                                        AntPathRequestMatcher.antMatcher("/h2-console/**")
-                                ).permitAll()
+                .sessionManagement(configurer -> {
+                    configurer.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED);
+                })
+                .authorizeHttpRequests(authorize ->
+                        authorize
+                                .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
+                                .requestMatchers("/swagger-ui/**", "/api-docs/**").permitAll()
+                                .anyRequest().permitAll()
                 )
-                .headers(
-                        headersConfigurer ->
-                                headersConfigurer
-                                        .frameOptions(
-                                                HeadersConfigurer.FrameOptionsConfig::sameOrigin
-                                        )
-                );
+//                .exceptionHandling(authenticationManager -> authenticationManager
+//                        .authenticationEntryPoint(customAuthenticationEntryPoint)
+//                        .accessDeniedHandler(customAccessDeniedHandler))
+                .addFilterBefore(httpLoggingFilter, WebAsyncManagerIntegrationFilter.class);
+//                .addFilterAfter(new ForceEagerSessionCreationFilter(), SessionRepositoryFilter.class);
 
-        return http.build();
+        return httpSecurity.build();
     }
 
-    @Bean
-    public WebSecurityCustomizer webSecurityCustomizer() {
-        // 정적 리소스 spring security 대상에서 제외
-        return (web) ->
-                web
-                        .ignoring()
-                        .requestMatchers(
-                                PathRequest.toStaticResources().atCommonLocations()
-                        );
-    }
+//    @Bean
+//    public WebSecurityCustomizer webSecurityCustomizer() {
+//        return (web) -> web.ignoring().
+//                requestMatchers(new AntPathRequestMatcher("/h2-console/**"))
+//                .requestMatchers(new AntPathRequestMatcher( "/favicon.ico"))
+//                .requestMatchers(new AntPathRequestMatcher( "/css/**"))
+//                .requestMatchers(new AntPathRequestMatcher( "/js/**"))
+//                .requestMatchers(new AntPathRequestMatcher( "/img/**"))
+//                .requestMatchers(new AntPathRequestMatcher( "/lib/**"));
+//    }
+//
+//    @Bean
+//    protected SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+//        http.csrf(AbstractHttpConfigurer::disable)
+//                .formLogin(AbstractHttpConfigurer::disable)
+//                .authorizeHttpRequests(authorize ->
+//                        authorize.anyRequest()
+//                                .authenticated())
+//                .addFilterBefore(httpLoggingFilter, WebAsyncManagerIntegrationFilter.class)
+//                .httpBasic(Customizer.withDefaults());
+//        return http.build();
+//    }
+
 
 }
