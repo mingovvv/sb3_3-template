@@ -1,6 +1,7 @@
 package demo.template.common.filter;
 
 import demo.template.common.utils.MDCUtil;
+import demo.template.sb3_3template.service.SessionHistoryService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -8,10 +9,12 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.util.ContentCachingRequestWrapper;
@@ -28,14 +31,14 @@ import java.util.concurrent.atomic.AtomicLong;
 @Component
 public class HttpLoggingFilter extends OncePerRequestFilter {
 
-    private final SessionHistoryCreation sessionHistoryCreation;
+    private final SessionHistoryService sessionHistoryService;
 
     private final List<String> returnUri = List.of("/favicon.ico", "/invalid-session");
     private final List<String> excludeUri = List.of("");
     private final AtomicLong id = new AtomicLong(0);
 
-    public HttpLoggingFilter(SessionHistoryCreation sessionHistoryCreation) {
-        this.sessionHistoryCreation = sessionHistoryCreation;
+    public HttpLoggingFilter(SessionHistoryService sessionHistoryService) {
+        this.sessionHistoryService = sessionHistoryService;
     }
 
     @Override
@@ -55,9 +58,13 @@ public class HttpLoggingFilter extends OncePerRequestFilter {
 
 
         Authentication authentication = new UsernamePasswordAuthenticationToken(
-                "{user-name}", null, Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER")));
+                "test-mgjang", null, Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER")));
+
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        request.getSession().setAttribute("SPRING_SECURITY_CONTEXT", request.getSession());
+        log.info("request.getSession().getAttribute(\"SPRING_SECURITY_CONTEXT\") : {}", request.getSession().getAttribute("SPRING_SECURITY_CONTEXT"));
 
         // todo Channel Filter
         if (excludeUri.stream().anyMatch(uri -> request.getRequestURI().startsWith(uri))) {
@@ -66,7 +73,7 @@ public class HttpLoggingFilter extends OncePerRequestFilter {
             logRequest(request);
 
             try {
-                sessionHistoryCreation.createSessionHistory(request.getSession());
+                sessionHistoryService.createSessionHistory(request.getSession());
                 filterChain.doFilter(request, response);
             } finally {
                 logResponse();
@@ -82,7 +89,7 @@ public class HttpLoggingFilter extends OncePerRequestFilter {
             logRequest(cachingRequestWrapper);
 
             try {
-                sessionHistoryCreation.createSessionHistory(request.getSession());
+                sessionHistoryService.createSessionHistory(request.getSession());
                 filterChain.doFilter(cachingRequestWrapper, cachingResponseWrapper);
             } finally {
                 logResponse(cachingResponseWrapper);

@@ -17,7 +17,6 @@ public class ObjectMapperBuilderCustomizer implements Jackson2ObjectMapperBuilde
     public void customize(Jackson2ObjectMapperBuilder jacksonObjectMapperBuilder) {
 
         JavaTimeModule javaTimeModule = new JavaTimeModule();
-        // LocalDateTime에 대한 글로벌 설정
         LocalDateTimeSerializer localDateTimeSerializer = new LocalDateTimeSerializer(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         javaTimeModule.addSerializer(LocalDateTime.class, localDateTimeSerializer);
         jacksonObjectMapperBuilder.modules(javaTimeModule);

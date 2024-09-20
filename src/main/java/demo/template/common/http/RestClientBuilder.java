@@ -1,4 +1,4 @@
-package demo.template.common.config;
+package demo.template.common.http;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.web.client.ClientHttpRequestFactories;
@@ -13,7 +13,7 @@ import java.util.Map;
 
 @Slf4j
 public class RestClientBuilder {
-    // test
+
     public static final Duration DEFAULT_CONNECTION_TIMEOUT_DURATION = Duration.ofMillis(1000L);
     public static final Duration DEFAULT_READ_TIMEOUT_DURATION = Duration.ofMillis(5000L);
 

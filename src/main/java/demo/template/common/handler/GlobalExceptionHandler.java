@@ -1,5 +1,7 @@
 package demo.template.common.handler;
 
+import demo.template.common.enums.ResultCode;
+import demo.template.common.model.BaseResponseFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.ConversionNotSupportedException;
 import org.springframework.beans.TypeMismatchException;
@@ -37,11 +39,43 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Objects;
 
+import static org.springframework.http.HttpStatus.*;
+
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
-//    @Override
+    @Override
+    protected ResponseEntity<Object> handleHttpRequestMethodNotSupported(HttpRequestMethodNotSupportedException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        return ResponseEntity
+                .status(METHOD_NOT_ALLOWED)
+                .body(BaseResponseFactory.create(ResultCode.Error.METHOD_NOT_ALLOWED));
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleNoHandlerFoundException(NoHandlerFoundException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        return ResponseEntity
+                .status(NOT_FOUND)
+                .body(BaseResponseFactory.create(ResultCode.Error.DATA_NOT_FOUND));
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        return ResponseEntity
+                .status(NOT_FOUND)
+                .body(BaseResponseFactory.create(ResultCode.Error.INVALID_JSON_FORMAT));
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleExceptionInternal(Exception ex, Object body, HttpHeaders headers, HttpStatusCode statusCode, WebRequest request) {
+        return ResponseEntity
+                .status(BAD_REQUEST)
+                .body(BaseResponseFactory.create(ResultCode.Error.UNKNOWN));
+    }
+
+
+
+    //    @Override
 //    protected ResponseEntity<Object> handleNoResourceFoundException(NoResourceFoundException e, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
 //        String decodedString = URLDecoder.decode(e.getResourcePath(), StandardCharsets.UTF_8);
 //        log.error("Exception Occurred. -> [올바르지 않은 경로 요청(NoResourceFoundException)] message : {}, path : {}", e.getMessage(), decodedString, e);

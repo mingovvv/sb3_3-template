@@ -1,4 +1,4 @@
-package demo.template.common.config;
+package demo.template.common.http;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
+import demo.template.common.exception.ApiErrorException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.springframework.http.HttpHeaders;
@@ -58,18 +59,13 @@ public class RestClientDefaultConfig {
                             log.info("API call <== statusCode : {}", response.getStatusCode());
                             log.info("API call <== headers : {}", response.getHeaders());
                             log.info("API call <== body : {}", IOUtils.toString(response.getBody(), StandardCharsets.UTF_8));
-//                            throw ApiErrorException.of(response.getStatusCode().value(), IOUtils.toString(response.getBody(), StandardCharsets.UTF_8));
+                            throw ApiErrorException.of(response.getStatusCode().value(), IOUtils.toString(response.getBody(), StandardCharsets.UTF_8));
                         })
                 .messageConverters(converters ->
                         converters.add(new MappingJackson2HttpMessageConverter(httpObjectMapper()))
                 );
     }
 
-    /**
-     * ObjectMapper for HTTP
-     *
-     * @return ObjectMapper
-     */
     public static ObjectMapper httpObjectMapper() {
         return new Jackson2ObjectMapperBuilder()
                 .modules(new ParameterNamesModule(), new Jdk8Module(), new JavaTimeModule())
@@ -84,9 +80,6 @@ public class RestClientDefaultConfig {
                 .build();
     }
 
-    /**
-     * Buffer Class for Response Body
-     */
     static class BufferingResponseWrapper implements ClientHttpResponse {
 
         private byte[] body;

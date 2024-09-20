@@ -18,6 +18,10 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter;
 import org.springframework.security.web.session.ForceEagerSessionCreationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.session.PrincipalNameIndexResolver;
+import org.springframework.session.Session;
+import org.springframework.session.web.http.HeaderHttpSessionIdResolver;
+import org.springframework.session.web.http.HttpSessionIdResolver;
 import org.springframework.session.web.http.SessionRepositoryFilter;
 
 @Configuration
@@ -80,6 +84,5 @@ public class SecurityConfig {
 //                .httpBasic(Customizer.withDefaults());
 //        return http.build();
 //    }
-
 
 }

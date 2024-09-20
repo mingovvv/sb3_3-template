@@ -1,18 +1,18 @@
-package demo.template.common.filter;
+package demo.template.sb3_3template.service;
 
 import demo.template.sb3_3template.entity.SpringSessionHist;
 import demo.template.sb3_3template.repository.SpringSessionHistRepository;
 import jakarta.servlet.http.HttpSession;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Component
+@Service
 @Transactional(readOnly = true)
-public class SessionHistoryCreation {
+public class SessionHistoryService {
 
     private final SpringSessionHistRepository springSessionHistRepository;
 
-    public SessionHistoryCreation(SpringSessionHistRepository springSessionHistRepository) {
+    public SessionHistoryService(SpringSessionHistRepository springSessionHistRepository) {
         this.springSessionHistRepository = springSessionHistRepository;
     }
 
