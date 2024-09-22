@@ -12,7 +12,7 @@ spring:
     hibernate:
       naming:
         implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyJpaCompliantImpl # 암시적 네이밍 전략
-        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl # 물리적 네이밍 전략
+        physical-strategy: demo.template.common.config.CustomNamingStrategyImpl
       ddl-auto: validate
     properties:
       hibernate:

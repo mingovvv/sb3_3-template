@@ -8,7 +8,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 @Component
-public class AuditorAwareCustom implements AuditorAware<String> {
+public class AuditorAwareCustomizer implements AuditorAware<String> {
 
     @Override
     public Optional<String> getCurrentAuditor() {

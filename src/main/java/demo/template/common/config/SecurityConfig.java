@@ -1,38 +1,28 @@
 package demo.template.common.config;
 
+import demo.template.common.filter.ExceptionHandlerFilter;
 import demo.template.common.filter.HttpLoggingFilter;
-import org.springframework.beans.factory.annotation.Autowired;
+import demo.template.common.filter.TokenFilter;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.Customizer;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter;
-import org.springframework.security.web.session.ForceEagerSessionCreationFilter;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
-import org.springframework.session.PrincipalNameIndexResolver;
-import org.springframework.session.Session;
-import org.springframework.session.web.http.HeaderHttpSessionIdResolver;
-import org.springframework.session.web.http.HttpSessionIdResolver;
-import org.springframework.session.web.http.SessionRepositoryFilter;
+import org.springframework.security.web.context.SecurityContextHolderFilter;
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
-    private final HttpLoggingFilter httpLoggingFilter;
+    private final ExceptionHandlerFilter exceptionHandlerFilter;
 
-    public SecurityConfig(HttpLoggingFilter httpLoggingFilter) {
-        this.httpLoggingFilter = httpLoggingFilter;
+    public SecurityConfig(ExceptionHandlerFilter exceptionHandlerFilter) {
+        this.exceptionHandlerFilter = exceptionHandlerFilter;
     }
 
     @Bean
@@ -43,7 +33,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
-                .csrf(AbstractHttpConfigurer::disable)
+                .csrf(AbstractHttpConfigurer::disable) // cors 고려
                 .sessionManagement(configurer -> {
                     configurer.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED);
                 })
@@ -53,11 +43,9 @@ public class SecurityConfig {
                                 .requestMatchers("/swagger-ui/**", "/api-docs/**").permitAll()
                                 .anyRequest().permitAll()
                 )
-//                .exceptionHandling(authenticationManager -> authenticationManager
-//                        .authenticationEntryPoint(customAuthenticationEntryPoint)
-//                        .accessDeniedHandler(customAccessDeniedHandler))
-                .addFilterBefore(httpLoggingFilter, WebAsyncManagerIntegrationFilter.class);
-//                .addFilterAfter(new ForceEagerSessionCreationFilter(), SessionRepositoryFilter.class);
+                .addFilterBefore(exceptionHandlerFilter, SecurityContextHolderFilter.class)
+                .addFilterAfter(new TokenFilter(), SecurityContextHolderFilter.class)
+                .addFilterAfter(new HttpLoggingFilter(), TokenFilter.class);
 
         return httpSecurity.build();
     }
@@ -65,24 +53,11 @@ public class SecurityConfig {
 //    @Bean
 //    public WebSecurityCustomizer webSecurityCustomizer() {
 //        return (web) -> web.ignoring().
-//                requestMatchers(new AntPathRequestMatcher("/h2-console/**"))
-//                .requestMatchers(new AntPathRequestMatcher( "/favicon.ico"))
+//                requestMatchers(new AntPathRequestMatcher( "/favicon.ico"))
 //                .requestMatchers(new AntPathRequestMatcher( "/css/**"))
 //                .requestMatchers(new AntPathRequestMatcher( "/js/**"))
 //                .requestMatchers(new AntPathRequestMatcher( "/img/**"))
 //                .requestMatchers(new AntPathRequestMatcher( "/lib/**"));
-//    }
-//
-//    @Bean
-//    protected SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-//        http.csrf(AbstractHttpConfigurer::disable)
-//                .formLogin(AbstractHttpConfigurer::disable)
-//                .authorizeHttpRequests(authorize ->
-//                        authorize.anyRequest()
-//                                .authenticated())
-//                .addFilterBefore(httpLoggingFilter, WebAsyncManagerIntegrationFilter.class)
-//                .httpBasic(Customizer.withDefaults());
-//        return http.build();
 //    }
 
 }

@@ -1,4 +1,4 @@
-package demo.template.common.filter;
+package demo.template.common.filter.wrapper;
 
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;

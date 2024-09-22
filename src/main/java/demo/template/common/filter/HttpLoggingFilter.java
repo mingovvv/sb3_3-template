@@ -1,7 +1,8 @@
 package demo.template.common.filter;
 
+import demo.template.common.filter.wrapper.CustomContentCachingRequestWrapper;
+import demo.template.common.filter.wrapper.CustomContentCachingResponseWrapper;
 import demo.template.common.utils.MDCUtil;
-import demo.template.sb3_3template.service.SessionHistoryService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -9,40 +10,26 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.core.annotation.Order;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.util.ContentCachingRequestWrapper;
 import org.springframework.web.util.ContentCachingResponseWrapper;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
 @Slf4j
-@Component
 public class HttpLoggingFilter extends OncePerRequestFilter {
 
-    private final SessionHistoryService sessionHistoryService;
-
-    private final List<String> returnUri = List.of("/favicon.ico", "/invalid-session");
     private final List<String> excludeUri = List.of("");
     private final AtomicLong id = new AtomicLong(0);
 
-    public HttpLoggingFilter(SessionHistoryService sessionHistoryService) {
-        this.sessionHistoryService = sessionHistoryService;
-    }
-
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+
+        log.info("filter : {}", "HttpLoggingFilter");
 
         Enumeration<String> headerNames = request.getHeaderNames();
 
@@ -52,28 +39,12 @@ public class HttpLoggingFilter extends OncePerRequestFilter {
             log.info("Header: {}={}", headerName, headerValue);
         }
 
-        if (returnUri.stream().anyMatch(uri -> request.getRequestURI().startsWith(uri))) {
-            return;
-        }
-
-
-        Authentication authentication = new UsernamePasswordAuthenticationToken(
-                "test-mgjang", null, Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER")));
-
-
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-
-        request.getSession().setAttribute("SPRING_SECURITY_CONTEXT", request.getSession());
-        log.info("request.getSession().getAttribute(\"SPRING_SECURITY_CONTEXT\") : {}", request.getSession().getAttribute("SPRING_SECURITY_CONTEXT"));
-
-        // todo Channel Filter
         if (excludeUri.stream().anyMatch(uri -> request.getRequestURI().startsWith(uri))) {
 
             initializeMDC(request);
             logRequest(request);
 
             try {
-                sessionHistoryService.createSessionHistory(request.getSession());
                 filterChain.doFilter(request, response);
             } finally {
                 logResponse();
@@ -89,7 +60,6 @@ public class HttpLoggingFilter extends OncePerRequestFilter {
             logRequest(cachingRequestWrapper);
 
             try {
-                sessionHistoryService.createSessionHistory(request.getSession());
                 filterChain.doFilter(cachingRequestWrapper, cachingResponseWrapper);
             } finally {
                 logResponse(cachingResponseWrapper);
@@ -122,7 +92,7 @@ public class HttpLoggingFilter extends OncePerRequestFilter {
         long reqSeqId = id.incrementAndGet();
         long startTime = System.currentTimeMillis();
         MDCUtil.setValue(MDCUtil.REQUEST_SEQ_ID, String.valueOf(reqSeqId));
-        MDCUtil.setValue(MDCUtil.REQUEST_UUID, RandomStringUtils.randomAlphanumeric(8));
+        MDCUtil.setValue(MDCUtil.REQUEST_UUID, RandomStringUtils.secure().next(8, true, true));
         MDCUtil.setValue(MDCUtil.REQUEST_START_TIME, String.valueOf(startTime));
         MDCUtil.setJsonValue(MDCUtil.HEADER_MAP, request.getHeaderMap());
         MDCUtil.setValue(MDCUtil.REQUEST_BODY, new String(request.getContentAsByteArray(), StandardCharsets.UTF_8));

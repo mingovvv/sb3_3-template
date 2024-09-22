@@ -1,34 +1,31 @@
 package demo.template.common.listener;
 
+import jakarta.servlet.http.HttpSessionListener;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.EventListener;
 import org.springframework.session.events.SessionCreatedEvent;
 import org.springframework.session.events.SessionDeletedEvent;
 import org.springframework.session.events.SessionExpiredEvent;
+import org.springframework.stereotype.Component;
 
+// for redis
 @Slf4j
-@Configuration
-public class SessionEventListener {
+@Component
+public class SessionEventListener implements HttpSessionListener {
 
     @EventListener
     public void handleSessionCreated(SessionCreatedEvent event) {
-        // 세션 정보를 가져와서 히스토리 테이블에 기록
-//        saveSessionToHistory(event.getSessionId(), event);
         log.info("Session created: " + event.getSession().getId());
     }
 
     @EventListener
     public void handleSessionDeleted(SessionDeletedEvent event) {
-        // 필요한 경우 삭제 이벤트도 히스토리 테이블에 기록 가능
-//        saveSessionToHistory(event.getSessionId(), event);
         log.info("Session deleted: " + event.getSession().getId());
     }
 
     @EventListener
     public void handleSessionExpired(SessionExpiredEvent event) {
-        // 만료된 세션도 히스토리 테이블에 기록
-//        saveSessionToHistory(event.getSessionId(), event);
         log.info("Session expired: " + event.getSession().getId());
     }
 
