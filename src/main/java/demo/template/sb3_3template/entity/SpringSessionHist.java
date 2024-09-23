@@ -5,12 +5,13 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.servlet.http.HttpSession;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
 
 @Entity
-@NoArgsConstructor
-@Table(name = "SPRING_SESSION_HIST")
+@Table(name = "QB_SPRING_SESSION_HIST")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class SpringSessionHist {
 
     @Id

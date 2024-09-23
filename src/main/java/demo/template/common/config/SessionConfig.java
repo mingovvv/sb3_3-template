@@ -26,7 +26,7 @@ public class SessionConfig {
 
         @Override
         public void customize(JdbcIndexedSessionRepository jdbcIndexedSessionRepository) {
-            jdbcIndexedSessionRepository.setTableName("SPRING_SESSION"); // todo prefix
+            jdbcIndexedSessionRepository.setTableName("CDE_QB_SPRING_SESSION");
             jdbcIndexedSessionRepository.setSaveMode(SaveMode.ON_SET_ATTRIBUTE);
 //            jdbcIndexedSessionRepository.save(jdbcIndexedSessionRepository.createSession());
             jdbcIndexedSessionRepository.setDefaultMaxInactiveInterval(Duration.ofMinutes(10));

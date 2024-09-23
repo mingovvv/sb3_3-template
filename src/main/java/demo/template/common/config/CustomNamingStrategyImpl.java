@@ -6,7 +6,7 @@ import org.hibernate.engine.jdbc.env.spi.JdbcEnvironment;
 
 public class CustomNamingStrategyImpl implements PhysicalNamingStrategy {
 
-    private static final String PREFIX = "";
+    private static final String PREFIX = "cde_";
 
     @Override
     public Identifier toPhysicalCatalogName(Identifier identifier, JdbcEnvironment jdbcEnvironment) {
