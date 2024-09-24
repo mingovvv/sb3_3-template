@@ -8,25 +8,28 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
-@IdClass(InfostockSectorEvent.CompositeKey.class)
+@IdClass(InfostockStockEvent.CompositeKey.class)
 @Entity
-@Table(name = "infostock_sector_event")
+@Table(name = "infostock_stock_event")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class InfostockSectorEvent extends MartBaseEntity {
+public class InfostockStockEvent extends MartBaseEntity {
 
     @Id
-    @Column(name = "theme_id")
-    private String themeId;
+    @Column(name = "seq_id")
+    private String seqId;
+
+    @Id
+    private String flag;
 
     @Column(name = "hist_dt")
     private String histDt;
 
     @Id
-    @Column(name = "theme_cd")
-    private String themeCd;
+    @Column(name = "stock_cd")
+    private String stockCd;
 
-    @Column(name = "theme_hist")
-    private String themeHist;
+    @Column(name = "stock_hist")
+    private String stockHist;
 
     @Column(name = "doc_id")
     private String docId;
@@ -35,9 +38,10 @@ public class InfostockSectorEvent extends MartBaseEntity {
 
     @NoArgsConstructor
     @EqualsAndHashCode
-    static protected class CompositeKey implements Serializable {
-        private String themeId;
-        private String themeCd;
+    static public class CompositeKey implements Serializable {
+        private String seqId;
+        private String flag;
+        private String stockCd;
     }
 
 }

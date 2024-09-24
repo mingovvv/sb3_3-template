@@ -1,8 +1,8 @@
 package demo.template.sb3_3template.service;
 
-import com.querydsl.core.group.GroupBy;
 import demo.template.common.utils.DateUtil;
 import demo.template.sb3_3template.dto.StockCompositeDto;
+import demo.template.sb3_3template.dto.StockWithEventDto;
 import demo.template.sb3_3template.dto.req.WatchlistReq;
 import demo.template.sb3_3template.dto.res.MarketRes;
 import demo.template.sb3_3template.dto.res.UserWatchlistRes;
@@ -11,10 +11,7 @@ import demo.template.sb3_3template.entity.mart.InfostockSectorIndex;
 import demo.template.sb3_3template.entity.mart.YhEcoCode;
 import demo.template.sb3_3template.enums.MarketType;
 import demo.template.sb3_3template.repository.WatchlistRepository;
-import demo.template.sb3_3template.repository.mart.InfostockSectorIndexRepository;
-import demo.template.sb3_3template.repository.mart.InfostockThemeRepository;
-import demo.template.sb3_3template.repository.mart.YhEcoCodeRepository;
-import demo.template.sb3_3template.repository.mart.YhStockCodeRepository;
+import demo.template.sb3_3template.repository.mart.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,13 +28,15 @@ public class WatchlistService {
     private final InfostockThemeRepository infostockThemeRepository;
     private final InfostockSectorIndexRepository infostockSectorIndexRepository;
     private final WatchlistRepository watchlistRepository;
+    private final InfostockStockEventRepository infostockStockEventRepository;
 
-    public WatchlistService(YhStockCodeRepository yhStockCodeRepository, YhEcoCodeRepository yhEcoCodeRepository, InfostockThemeRepository infostockThemeRepository, InfostockSectorIndexRepository infostockSectorIndexRepository, WatchlistRepository watchlistRepository) {
+    public WatchlistService(YhStockCodeRepository yhStockCodeRepository, YhEcoCodeRepository yhEcoCodeRepository, InfostockThemeRepository infostockThemeRepository, InfostockSectorIndexRepository infostockSectorIndexRepository, WatchlistRepository watchlistRepository, InfostockStockEventRepository infostockStockEventRepository) {
         this.yhStockCodeRepository = yhStockCodeRepository;
         this.yhEcoCodeRepository = yhEcoCodeRepository;
         this.infostockThemeRepository = infostockThemeRepository;
         this.infostockSectorIndexRepository = infostockSectorIndexRepository;
         this.watchlistRepository = watchlistRepository;
+        this.infostockStockEventRepository = infostockStockEventRepository;
     }
 
     public MarketRes getMarketList(MarketType marketType) {
@@ -46,7 +45,7 @@ public class WatchlistService {
             case STOCK -> {
 
                 // 전체 종목 리스트 조회 + 종목의 섹터, 종목의 지수
-                List<StockCompositeDto> stockComposite = yhStockCodeRepository.findAllStockWithIndexAndSector();
+                List<StockCompositeDto> stockComposite = yhStockCodeRepository.findStockWithIndexAndSector(null);
                 yield MarketRes.fromStockCompositeDto(stockComposite);
 
             }
@@ -77,16 +76,21 @@ public class WatchlistService {
 
             if (k.equalsIgnoreCase("STOCK")) {
 
+                List<String> stockCodeList = v.stream().map(Watchlist::getItemId).toList();
+
                 // 동적쿼리로 변환
-                List<StockCompositeDto> allStockWithIndexAndSector = yhStockCodeRepository.findAllStockWithIndexAndSector();
+                List<StockCompositeDto> stockWithIndexAndSector = yhStockCodeRepository.findStockWithIndexAndSector(stockCodeList);
 
                 // 이벤트 구하기
+                List<StockWithEventDto> stockWithEvent = infostockStockEventRepository.findStockWithEvent(stockCodeList);
 
                 // 증감율 구하기
+                // todo
 
             } else if (k.equalsIgnoreCase("INDEX")) {
 
                 // 증감율 구하기
+                // todo
 
             } else {
 

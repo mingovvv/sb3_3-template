@@ -13,7 +13,7 @@ import static demo.template.sb3_3template.entity.mart.QInfostockThemeStock.infos
 import static demo.template.sb3_3template.entity.mart.QYhStockCode.yhStockCode;
 
 @Repository
-public class CustomInfostockThemeRepositoryImpl implements CustomYhStockCodeRepository {
+public class CustomInfostockThemeRepositoryImpl implements CustomInfostockThemeRepository {
 
     private final JPAQueryFactory queryFactory;
 
@@ -22,7 +22,7 @@ public class CustomInfostockThemeRepositoryImpl implements CustomYhStockCodeRepo
     }
 
     @Override
-    public List<StockCompositeDto> findAllStockWithIndexAndSector() {
+    public List<StockCompositeDto> findAllSectorWithStock() {
         return null;
     }
 

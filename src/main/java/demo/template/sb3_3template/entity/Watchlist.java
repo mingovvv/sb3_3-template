@@ -31,20 +31,24 @@ public class Watchlist extends BaseEntity {
     @Column(name = "item_id")
     private String itemId;
 
-    @Column(name = "item_cd")
-    private String itemCode;
+    @Column(name = "item_nm")
+    private String itemName;
+
+    @Column(name = "std_date")
+    private String standardDate;
 
     @Column(name = "position")
-    private String position;
+    private Integer position;
 
     @Builder
-    public Watchlist(LocalDateTime registerDt, LocalDateTime modifyDt, String registerId, String modifyId, Long watchlistId, String userId, String typeCode, String itemId, String itemCode, String position) {
+    public Watchlist(LocalDateTime registerDt, LocalDateTime modifyDt, String registerId, String modifyId, Long watchlistId, String userId, String typeCode, String itemId, String itemName, String standardDate, Integer position) {
         super(registerDt, modifyDt, registerId, modifyId);
         this.watchlistId = watchlistId;
         this.userId = userId;
         this.typeCode = typeCode;
         this.itemId = itemId;
-        this.itemCode = itemCode;
+        this.itemName = itemName;
+        this.standardDate = standardDate;
         this.position = position;
     }
 

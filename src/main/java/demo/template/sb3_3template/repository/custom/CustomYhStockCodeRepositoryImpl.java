@@ -1,5 +1,6 @@
 package demo.template.sb3_3template.repository.custom;
 
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import demo.template.sb3_3template.dto.QStockCompositeDto;
 import demo.template.sb3_3template.dto.StockCompositeDto;
@@ -21,7 +22,14 @@ public class CustomYhStockCodeRepositoryImpl implements CustomYhStockCodeReposit
     }
 
     @Override
-    public List<StockCompositeDto> findAllStockWithIndexAndSector() {
+    public List<StockCompositeDto> findStockWithIndexAndSector(List<String> stockCodeList) {
+
+        BooleanBuilder whereClause = new BooleanBuilder();
+
+        if (stockCodeList != null && !stockCodeList.isEmpty()) {
+            whereClause.and(yhStockCode.stockCd.in(stockCodeList));
+        }
+
         return queryFactory
                 .select(new QStockCompositeDto(
                         yhStockCode.stockCd,
@@ -30,6 +38,7 @@ public class CustomYhStockCodeRepositoryImpl implements CustomYhStockCodeReposit
                         infostockTheme.themeNm
                 ))
                 .from(yhStockCode)
+                .where(whereClause)
                 .leftJoin(infostockThemeStock)
                 .on(yhStockCode.stockCd.eq(infostockThemeStock.stockCd))
                 .leftJoin(infostockTheme)

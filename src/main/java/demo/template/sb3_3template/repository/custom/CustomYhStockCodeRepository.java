@@ -6,6 +6,6 @@ import java.util.List;
 
 public interface CustomYhStockCodeRepository {
 
-    List<StockCompositeDto> findAllStockWithIndexAndSector();
+    List<StockCompositeDto> findStockWithIndexAndSector(List<String> stockCodeList);
 
 }
