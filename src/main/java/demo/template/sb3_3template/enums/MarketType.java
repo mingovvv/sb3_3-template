@@ -4,6 +4,10 @@ public enum MarketType {
 
     STOCK,
     SECTOR,
-    INDEX
+    INDEX;
+
+    public static MarketType findByType(String type) {
+        return MarketType.valueOf(type.toUpperCase());
+    }
 
 }

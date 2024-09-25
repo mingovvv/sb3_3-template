@@ -1,16 +1,16 @@
 package demo.template.sb3_3template.repository.custom;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import demo.template.sb3_3template.dto.QStockWithEventDto;
-import demo.template.sb3_3template.dto.StockWithEventDto;
+import demo.template.sb3_3template.dto.EventOfSectorDto;
+import demo.template.sb3_3template.dto.QEventOfSectorDto;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-import static demo.template.sb3_3template.entity.mart.QInfostockStockEvent.infostockStockEvent;
+import static demo.template.sb3_3template.entity.mart.QInfostockSectorEvent.infostockSectorEvent;
 
 @Repository
-public class CustomInfostockSectorEventRepositoryImpl implements CustomInfostockStockEventRepository {
+public class CustomInfostockSectorEventRepositoryImpl implements CustomInfostockSectorEventRepository {
 
     private final JPAQueryFactory queryFactory;
 
@@ -19,26 +19,26 @@ public class CustomInfostockSectorEventRepositoryImpl implements CustomInfostock
     }
 
     @Override
-    public List<StockWithEventDto> findStockWithEvent(List<String> sectorNames) {
+    public List<EventOfSectorDto> findEventOfSector(List<String> sectorCodeList) {
 
-        return null;
-//        return queryFactory
-//                .select(new QStockWithEventDto(
-//                            infostockStockEvent.stockCd,
-//                            infostockStockEvent.histDt
-//                    )
-//                )
-//                .from(infostockStockEvent)
-//                .where(
-//                    infostockStockEvent.stockCd.in(stockNameList)
-//                            .and(infostockStockEvent.histDt.eq(
-//                                    queryFactory
-//                                            .select(infostockStockEvent.histDt.max())
-//                                            .from(infostockStockEvent)
-//                                            .where(infostockStockEvent.stockCd.in(stockNameList))
-//                                            .groupBy(infostockStockEvent.stockCd)
-//                            ))
-//                ).fetch();
+        return queryFactory
+                .select(new QEventOfSectorDto(
+                        infostockSectorEvent.themeCd,
+                        infostockSectorEvent.event
+                        )
+                )
+                .from(infostockSectorEvent)
+                .where(
+                        infostockSectorEvent.themeCd.in(sectorCodeList)
+                                .and(infostockSectorEvent.histDt.eq(
+                                        queryFactory
+                                                .select(infostockSectorEvent.histDt.max())
+                                                .from(infostockSectorEvent)
+                                                .where(infostockSectorEvent.themeCd.in(sectorCodeList))
+                                                .groupBy(infostockSectorEvent.themeCd)
+                                ))
+                ).fetch();
+
     }
 
 }

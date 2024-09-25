@@ -35,7 +35,7 @@ public class InfostockSectorEvent extends MartBaseEntity {
 
     @NoArgsConstructor
     @EqualsAndHashCode
-    static protected class CompositeKey implements Serializable {
+    static public class CompositeKey implements Serializable {
         private String themeId;
         private String themeCd;
     }

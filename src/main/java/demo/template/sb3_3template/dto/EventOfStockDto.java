@@ -2,7 +2,7 @@ package demo.template.sb3_3template.dto;
 
 import com.querydsl.core.annotations.QueryProjection;
 
-public record StockWithEventDto(
+public record EventOfStockDto(
 
         String stockCode,
         String event
@@ -10,7 +10,7 @@ public record StockWithEventDto(
 ) {
 
     @QueryProjection
-    public StockWithEventDto(String stockCode, String event) {
+    public EventOfStockDto(String stockCode, String event) {
         this.stockCode = stockCode;
         this.event = event;
     }

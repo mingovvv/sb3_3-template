@@ -6,6 +6,6 @@ import java.util.List;
 
 public interface CustomInfostockSectorEventRepository {
 
-    List<EventOfSectorDto> findEventOfSector(List<String> sectors);
+    List<EventOfSectorDto> findEventOfSector(List<String> sectorCodeList);
 
 }

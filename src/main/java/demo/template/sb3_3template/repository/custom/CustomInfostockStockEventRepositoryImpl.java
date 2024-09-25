@@ -1,11 +1,8 @@
 package demo.template.sb3_3template.repository.custom;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import demo.template.sb3_3template.dto.QStockWithEventDto;
-import demo.template.sb3_3template.dto.StockWithEventDto;
-import demo.template.sb3_3template.entity.mart.InfostockStockEvent;
-import demo.template.sb3_3template.entity.mart.QInfostockStockEvent;
-import demo.template.sb3_3template.repository.mart.InfostockStockEventRepository;
+import demo.template.sb3_3template.dto.QEventOfStockDto;
+import demo.template.sb3_3template.dto.EventOfStockDto;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -22,25 +19,26 @@ public class CustomInfostockStockEventRepositoryImpl implements CustomInfostockS
     }
 
     @Override
-    public List<StockWithEventDto> findStockWithEvent(List<String> stockNameList) {
+    public List<EventOfStockDto> findEventOfStock(List<String> stockCodeList) {
 
         return queryFactory
-                .select(new QStockWithEventDto(
+                .select(new QEventOfStockDto(
                             infostockStockEvent.stockCd,
                             infostockStockEvent.histDt
                     )
                 )
                 .from(infostockStockEvent)
                 .where(
-                    infostockStockEvent.stockCd.in(stockNameList)
+                    infostockStockEvent.stockCd.in(stockCodeList)
                             .and(infostockStockEvent.histDt.eq(
                                     queryFactory
                                             .select(infostockStockEvent.histDt.max())
                                             .from(infostockStockEvent)
-                                            .where(infostockStockEvent.stockCd.in(stockNameList))
+                                            .where(infostockStockEvent.stockCd.in(stockCodeList))
                                             .groupBy(infostockStockEvent.stockCd)
                             ))
                 ).fetch();
+
     }
 
 }
