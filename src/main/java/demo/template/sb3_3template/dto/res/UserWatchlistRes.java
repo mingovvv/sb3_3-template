@@ -1,10 +1,15 @@
 package demo.template.sb3_3template.dto.res;
 
+import demo.template.sb3_3template.dto.EventOfStockDto;
+import demo.template.sb3_3template.dto.RateOfReturnDto;
+import demo.template.sb3_3template.dto.StockCompositeDto;
 import demo.template.sb3_3template.entity.Watchlist;
+import demo.template.sb3_3template.enums.IndexKrType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 
 import java.util.List;
+import java.util.Map;
 
 public record UserWatchlistRes(
 
@@ -40,21 +45,33 @@ public record UserWatchlistRes(
 
 ) {
 
-        @Builder
-        public UserWatchlistRes(Long watchlistId, String marketCode, String itemId, String itemName, int position, String standardDate, String event, String index, String sector, int rateOfReturn) {
-                this.watchlistId = watchlistId;
-                this.marketCode = marketCode;
-                this.itemId = itemId;
-                this.itemName = itemName;
-                this.position = position;
-                this.standardDate = standardDate;
-                this.event = event;
-                this.index = index;
-                this.sector = sector;
-                this.rateOfReturn = rateOfReturn;
-        }
+    @Builder
+    public UserWatchlistRes(Long watchlistId, String marketCode, String itemId, String itemName, int position, String standardDate, String event, String index, String sector, int rateOfReturn) {
+        this.watchlistId = watchlistId;
+        this.marketCode = marketCode;
+        this.itemId = itemId;
+        this.itemName = itemName;
+        this.position = position;
+        this.standardDate = standardDate;
+        this.event = event;
+        this.index = index;
+        this.sector = sector;
+        this.rateOfReturn = rateOfReturn;
+    }
 
-        public static List<UserWatchlistRes> from(List<Watchlist> watchlist) {
-                return null;
-        }
+    public static UserWatchlistRes from(Watchlist watchlist, Map<String, StockCompositeDto> stockMap, Map<String, String> eventMap, Map<String, Integer> rateMap) {
+        return UserWatchlistRes.builder()
+                .watchlistId(watchlist.getWatchlistId())
+                .marketCode(watchlist.getTypeCode())
+                .itemId(watchlist.getItemId())
+                .itemName(watchlist.getItemName())
+                .position(watchlist.getPosition())
+                .standardDate(watchlist.getStandardDate())
+                .event(eventMap.get(watchlist.getItemId()))
+                .rateOfReturn(rateMap.get(watchlist.getItemId()))
+                .index(IndexKrType.findByExcngId(stockMap.getOrDefault(watchlist.getItemId(), null).indexOfStock()).name())
+                .sector(stockMap.getOrDefault(watchlist.getItemId(), null).sectorOfStock())
+                .build();
+    }
+
 }

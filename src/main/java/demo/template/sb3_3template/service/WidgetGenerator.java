@@ -44,10 +44,10 @@ public class WidgetGenerator {
                     if (tag1 == Tag.STOCK) {
 
                         // todo 종목의 타겟일+1D 변동률 구하기
-                        YhStockCodeRepository stockReturnRate = yhStockCodeRepository.findStockReturnRate(entityName.get(), "1", "20240505").orElse(null);
+//                        YhStockCodeRepository stockReturnRate = yhStockCodeRepository.findStockReturnRate(entityName.get(), "1", "20240505").orElse(null);
 
                         // todo 지수의 타겟일+1D 변동률 구하기
-                        YhEcoReturnRate indexReturnRate = yhEcoReturnRateRepository.findByEcoCodeAndBsnsDaysAndStdDt("KOSPI", "1", "20240505").orElse(null);
+//                        YhEcoReturnRate indexReturnRate = yhEcoReturnRateRepository.findByEcoCodeAndBsnsDaysAndStdDt("KOSPI", "1", "20240505").orElse(null);
 
 
                     } else if (tag1 == Tag.INDEX) {

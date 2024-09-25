@@ -11,7 +11,8 @@ import java.util.stream.Stream;
 public enum IndexKrType {
 
     KOSPI("1", "코스피", "703000"),
-    KOSDAQ("7", "코스닥", "940029");
+    KOSDAQ("7", "코스닥", "940029"),
+    DEFAULT(null, null, null);
 
     private String excngId;
     private String excngName;
@@ -34,11 +35,11 @@ public enum IndexKrType {
     }
 
     public static IndexKrType findByExcngId(String excngId) {
-        return INDEX_KR_TYPE_BY_EXCNGID_MAP.getOrDefault(excngId, null);
+        return INDEX_KR_TYPE_BY_EXCNGID_MAP.getOrDefault(excngId, DEFAULT);
     }
 
     public static IndexKrType findByEcoCode(String ecoCode) {
-        return INDEX_KR_TYPE_BY_ECOCODE_MAP.getOrDefault(ecoCode, null);
+        return INDEX_KR_TYPE_BY_ECOCODE_MAP.getOrDefault(ecoCode, DEFAULT);
     }
 
 }

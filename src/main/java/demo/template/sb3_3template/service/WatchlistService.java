@@ -22,6 +22,7 @@ import demo.template.sb3_3template.repository.raw.InfostockThemeRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -48,6 +49,12 @@ public class WatchlistService {
         this.infostockSectorEventRepository = infostockSectorEventRepository;
     }
 
+    /**
+     * 마켓 데이터(종목, 지수, 섹터) 조회
+     *
+     * @param marketType marketType
+     * @return MarketRes
+     */
     public MarketRes getMarketList(MarketType marketType) {
 
         return switch (marketType) {
@@ -76,7 +83,16 @@ public class WatchlistService {
 
     }
 
+    /**
+     * 사용자 관심종목 리스트 조회
+     *
+     * @param userId userId
+     * @return List<UserWatchlistRes>
+     */
     public List<UserWatchlistRes> getUserWatchlist(String userId) {
+
+        List<UserWatchlistRes> totalWatchlist = new ArrayList<>();
+
         List<Watchlist> watchlist = watchlistRepository.findByUserId(userId);
 
         // 관심종목 마켓별로 구분
@@ -86,16 +102,21 @@ public class WatchlistService {
 
             if (k.equalsIgnoreCase(MarketType.STOCK.name())) {
 
-                List<String> stockCodeList = v.stream().map(Watchlist::getItemId).toList();
+                List<String> stockIds = v.stream().map(Watchlist::getItemId).toList();
 
-                List<StockCompositeDto> stockWithIndexAndSector = yhStockCodeRepository.findStockWithIndexAndSector(stockCodeList);
+                // 종목의 지수, 종목의 섹터 구하기
+                List<StockCompositeDto> stockWithIndexAndSector = yhStockCodeRepository.findStockWithIndexAndSector(stockIds);
+                Map<String, StockCompositeDto> stockMap = stockWithIndexAndSector.stream().collect(Collectors.toMap(StockCompositeDto::stockId, stock -> stock));
 
                 // 이벤트 구하기
-                List<EventOfStockDto> eventOfStock = infostockStockEventRepository.findEventOfStock(stockCodeList);
+                List<EventOfStockDto> eventOfStock = infostockStockEventRepository.findEventOfStock(stockIds);
+                Map<String, String> eventMap = eventOfStock.stream().collect(Collectors.toMap(EventOfStockDto::stockCode, EventOfStockDto::event));
 
                 // 증감율 구하기
                 List<RateOfReturnDto> rateOfReturn = yhStockCodeRepository.findStockRateOfReturn(v, DateUtil.getMinusDay(1));
+                Map<String, Integer> rateMap = rateOfReturn.stream().collect(Collectors.toMap(RateOfReturnDto::code, RateOfReturnDto::rateOfReturn));
 
+                v.stream().map(watch -> UserWatchlistRes.from(watch, stockMap, eventMap, rateMap)).forEach(totalWatchlist::add);
 
             } else if (k.equalsIgnoreCase(MarketType.INDEX.name())) {
 
@@ -116,21 +137,27 @@ public class WatchlistService {
 
         });
 
-        return UserWatchlistRes.from(watchlist);
+        return List.of();
 
     }
 
+    /**
+     * 사용자 관심종목 등록
+     *
+     * @param postWatch dto
+     * @return WatchlistRes.PostWatch
+     */
     @Transactional
     public WatchlistRes.PostWatch postUserWatchlist(WatchlistReq.PostWatch postWatch) {
 
-        switch (MarketType.findByType(postWatch.marketCode())) {
-            case STOCK ->
-                    yhStockCodeRepository.findByStockCd(postWatch.itemId()).orElseThrow(() -> AppErrorException.of(ResultCode.Error.INVALID_VALUE, "The 'itemId' does not exist."));
-            case INDEX ->
-                    yhEcoCodeRepository.findByTypeAndEcoCode("index", postWatch.itemId()).orElseThrow(() -> AppErrorException.of(ResultCode.Error.INVALID_VALUE, "The 'itemId' does not exist."));
-            case SECTOR ->
-                    infostockThemeRepository.findById(postWatch.itemId()).orElseThrow(() -> AppErrorException.of(ResultCode.Error.INVALID_VALUE, "The 'itemId' does not exist."));
-        }
+        String itemNm = switch (MarketType.findByType(postWatch.marketCode())) {
+            case STOCK -> yhStockCodeRepository.findByStockCd(postWatch.itemId())
+                    .orElseThrow(() -> AppErrorException.of(ResultCode.Error.INVALID_VALUE, "The 'itemId' does not exist.")).getStockNameKr();
+            case INDEX -> yhEcoCodeRepository.findByTypeAndEcoCode("index", postWatch.itemId())
+                    .orElseThrow(() -> AppErrorException.of(ResultCode.Error.INVALID_VALUE, "The 'itemId' does not exist.")).getEcoNameKr();
+            case SECTOR -> infostockThemeRepository.findById(postWatch.itemId())
+                    .orElseThrow(() -> AppErrorException.of(ResultCode.Error.INVALID_VALUE, "The 'itemId' does not exist.")).getThemeNm();
+        };
 
         watchlistRepository.findByUserIdAndTypeCodeAndItemId(postWatch.userId(), postWatch.marketCode(), postWatch.itemId())
                 .ifPresent(watchlist -> {
@@ -138,38 +165,38 @@ public class WatchlistService {
                 });
 
         int maxPosition = watchlistRepository.getMaxPosition(postWatch.userId());
-        return WatchlistRes.PostWatch.toRes(Watchlist.toEntity(postWatch, maxPosition));
+        return WatchlistRes.PostWatch.toRes(Watchlist.toEntity(postWatch, maxPosition, itemNm));
 
     }
 
+    /**
+     * 사용자 관심종목 수정
+     *
+     * @param watchlistId id
+     * @param patchWatch  dto
+     * @return List<UserWatchlistRes>
+     */
     @Transactional
-    public List<UserWatchlistRes> patchUserWatchlist(Long watchlistId, WatchlistReq.PatchWatch patchWatch) {
+    public WatchlistRes.PostWatch patchUserWatchlist(Long watchlistId, WatchlistReq.PatchWatch patchWatch) {
 
         Watchlist watchlist = watchlistRepository.findById(watchlistId)
                 .orElseThrow(() -> AppErrorException.of(ResultCode.Error.INVALID_VALUE, "The 'watchlistId' does not exist."));
 
-        Integer previousPosition = watchlist.getPosition();
+        // todo 기준일 validation 필요...? (미래, 형식)
 
-        // todo 기준일 validation 필요 (미래, 형식)
+        watchlistRepository.updateWatchlistPosition(watchlistId, patchWatch.userId(), patchWatch.standardDate(), watchlist.getPosition(), patchWatch.position());
 
-        if (patchWatch.position() != null) {
-
-            if (previousPosition > patchWatch.position()) {
-//                watchlistRepository.updatePositionByUserId(1, patchWatch.userId());
-            }
-            if (previousPosition < patchWatch.position()) {
-//                watchlistRepository.updatePositionByUserId(-1, patchWatch.userId());
-            }
-
-            watchlist.updateStandardDate(patchWatch);
-
-        }
-
-
-        return null;
+        return WatchlistRes.PostWatch.toRes(watchlist, patchWatch);
 
     }
 
+    /**
+     * 사용자 관심종목 삭제
+     *
+     * @param watchlistId id
+     * @param deleteWatch dto
+     * @return WatchlistRes.DeleteWatch
+     */
     @Transactional
     public WatchlistRes.DeleteWatch deleteUserWatchlist(Long watchlistId, WatchlistReq.DeleteWatch deleteWatch) {
 
@@ -179,6 +206,7 @@ public class WatchlistService {
         watchlistRepository.delete(watchlist);
 
         return WatchlistRes.DeleteWatch.toRes(watchlistId);
+
     }
 
 }

@@ -5,7 +5,6 @@ import lombok.Getter;
 
 import java.util.List;
 
-@Getter
 public record InferencePipelineRes(
 
         @JsonProperty("widget_group")
@@ -21,7 +20,6 @@ public record InferencePipelineRes(
 
 ) {
 
-    @Getter
     public record QuestionMeta(
 
             Ner ner,
@@ -32,7 +30,6 @@ public record InferencePipelineRes(
 
     ) {
 
-        @Getter
         public record Ner(
 
             @JsonProperty("tagged_sentence")
@@ -42,7 +39,6 @@ public record InferencePipelineRes(
 
         ) {
 
-            @Getter
             public record Entities(
 
                     String entity,
@@ -55,7 +51,6 @@ public record InferencePipelineRes(
 
         }
 
-        @Getter
         public record Eex(
 
             String event,
@@ -66,7 +61,6 @@ public record InferencePipelineRes(
 
         }
 
-        @Getter
         public record Nsm(
 
             String sector,

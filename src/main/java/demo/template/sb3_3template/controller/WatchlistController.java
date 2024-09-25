@@ -35,7 +35,7 @@ public class WatchlistController {
     public BaseResponse<MarketRes> getMarketList(
             @RequestParam @Parameter(description = "조회 유형(STOCK, INDEX, SECTOR)", example = "SECTOR") @Valid MarketType type
     ) {
-        return BaseResponseFactory.create( watchlistService.getMarketList(type) );
+        return BaseResponseFactory.create(watchlistService.getMarketList(type));
     }
 
 
@@ -62,7 +62,7 @@ public class WatchlistController {
     @Operation(summary = "관심종목 수정 API", description = "관심종목을 수정합니다.")
     @ApiResponse(responseCode = "200", description = "HTTP Status Code is 200")
     @PatchMapping("/watchlist/{watchlist_id}")
-    public BaseResponse<List<UserWatchlistRes>> patchUserWatchlist(
+    public BaseResponse<WatchlistRes.PostWatch> patchUserWatchlist(
             @PathVariable("watchlist_id") @Parameter(description = "관심종목_ID", example = "1") Long watchlistId,
             @RequestBody @Valid WatchlistReq.PatchWatch patchWatch
     ) {

@@ -23,20 +23,20 @@ public class CustomInfostockStockEventRepositoryImpl implements CustomInfostockS
 
         return queryFactory
                 .select(new QEventOfStockDto(
-                            infostockStockEvent.stockCd,
-                            infostockStockEvent.histDt
-                    )
+                                infostockStockEvent.stockCd,
+                                infostockStockEvent.histDt
+                        )
                 )
                 .from(infostockStockEvent)
                 .where(
-                    infostockStockEvent.stockCd.in(stockCodeList)
-                            .and(infostockStockEvent.histDt.eq(
-                                    queryFactory
-                                            .select(infostockStockEvent.histDt.max())
-                                            .from(infostockStockEvent)
-                                            .where(infostockStockEvent.stockCd.in(stockCodeList))
-                                            .groupBy(infostockStockEvent.stockCd)
-                            ))
+                        infostockStockEvent.stockCd.in(stockCodeList)
+                                .and(infostockStockEvent.histDt.eq(
+                                        queryFactory
+                                                .select(infostockStockEvent.histDt.max())
+                                                .from(infostockStockEvent)
+                                                .where(infostockStockEvent.stockCd.in(stockCodeList))
+                                                .groupBy(infostockStockEvent.stockCd)
+                                ))
                 ).fetch();
 
     }

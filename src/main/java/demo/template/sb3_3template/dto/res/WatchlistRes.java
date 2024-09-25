@@ -1,9 +1,13 @@
 package demo.template.sb3_3template.dto.res;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import demo.template.sb3_3template.dto.req.WatchlistReq;
 import demo.template.sb3_3template.entity.Watchlist;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 
 import java.time.LocalDateTime;
 
@@ -61,6 +65,19 @@ public record WatchlistRes(
                     .itemName(watchlist.getItemName())
                     .position(watchlist.getPosition())
                     .standardDate(watchlist.getStandardDate())
+                    .registerDt(watchlist.getRegisterDt())
+                    .build();
+        }
+
+        public static WatchlistRes.PostWatch toRes(Watchlist watchlist, WatchlistReq.PatchWatch patchWatch) {
+            return WatchlistRes.PostWatch.builder()
+                    .watchListId(watchlist.getWatchlistId())
+                    .userId(watchlist.getUserId())
+                    .marketCode(watchlist.getTypeCode())
+                    .itemId(watchlist.getItemId())
+                    .itemName(watchlist.getItemName())
+                    .position(ObjectUtils.defaultIfNull(patchWatch.position(), watchlist.getPosition()))
+                    .standardDate(ObjectUtils.defaultIfNull(patchWatch.standardDate(), watchlist.getStandardDate()))
                     .registerDt(watchlist.getRegisterDt())
                     .build();
         }

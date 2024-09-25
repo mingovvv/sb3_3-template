@@ -56,12 +56,12 @@ public class Watchlist extends BaseEntity {
         this.position = position;
     }
 
-    public static Watchlist toEntity(WatchlistReq.PostWatch postWatch, int maxPosition) {
+    public static Watchlist toEntity(WatchlistReq.PostWatch postWatch, int maxPosition, String itemNm) {
         return Watchlist.builder()
                 .userId(postWatch.userId())
                 .typeCode(postWatch.marketCode())
                 .itemId(postWatch.itemId())
-                .itemName(null) // todo ...
+                .itemName(itemNm)
                 .standardDate(DateUtil.getMinusDay(0))
                 .position(maxPosition + 1)
                 .build();

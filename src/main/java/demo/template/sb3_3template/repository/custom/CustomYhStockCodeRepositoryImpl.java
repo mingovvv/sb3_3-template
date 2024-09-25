@@ -1,20 +1,15 @@
 package demo.template.sb3_3template.repository.custom;
 
 import com.querydsl.core.BooleanBuilder;
-import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.Expressions;
-import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import demo.template.sb3_3template.dto.QRateOfReturnDto;
 import demo.template.sb3_3template.dto.QStockCompositeDto;
 import demo.template.sb3_3template.dto.RateOfReturnDto;
 import demo.template.sb3_3template.dto.StockCompositeDto;
 import demo.template.sb3_3template.entity.Watchlist;
-import org.eclipse.jdt.internal.compiler.ast.Expression;
 import org.springframework.stereotype.Repository;
 
-import java.math.BigDecimal;
-import java.util.Arrays;
 import java.util.List;
 
 import static demo.template.sb3_3template.entity.mart.QYhMarket.yhMarket;
@@ -57,40 +52,60 @@ public class CustomYhStockCodeRepositoryImpl implements CustomYhStockCodeReposit
     }
 
     @Override
-    public List<RateOfReturnDto> findStockRateOfReturn(List<Watchlist> v, String targetDate) {
+    public List<RateOfReturnDto> findStockRateOfReturn(List<Watchlist> stockList, String targetDate) {
 
-        v.forEach(item -> {
+        return stockList.stream().map(item -> queryFactory
+                .select(new QRateOfReturnDto(
+                        yhStockCode.stockCd,
+                        Expressions.cases()
+                                .when(yhMarket.stdDt.eq(item.getStandardDate()))
+                                .then(yhMarket.close.castToNum(Integer.class))
+                                .otherwise(0).as("standardDateClose"),
+                        Expressions.cases()
+                                .when(yhMarket.stdDt.ne(item.getStandardDate()))
+                                .then(yhMarket.close.castToNum(Integer.class))
+                                .otherwise(0).as("targetDateClose"),
+                        Expressions.numberTemplate(Integer.class, "({0} - {1}) / {1} * 100",
+                                        yhMarket.close.castToNum(Integer.class), // targetDtClose
+                                        Expressions.cases() // stdDtClose 값 설정
+                                                .when(yhMarket.stdDt.eq(yhMarket.stdDt))
+                                                .then(yhMarket.close.castToNum(Integer.class))
+                                                .otherwise(0))
+                                .as("rateOfReturn")
+                ))
+                .from(yhStockCode)
+                .where(yhStockCode.stockCd.eq(item.getItemId()))
+                .leftJoin(yhMarket.yhStockCode, yhStockCode)
+                .where(yhMarket.stdDt.in(item.getStandardDate(), targetDate))
+                .fetchOne()).toList();
 
-            queryFactory
-                    .select(new QRateOfReturnDto(
-                            yhStockCode.stockCd,
-                            Expressions.cases()
-                                    .when(yhMarket.stdDt.eq(item.getStandardDate()))
-                                    .then(yhMarket.close)
-                                    .otherwise(String.valueOf(0)).as("standardDateClose").length(),
-                            Expressions.cases()
-                                    .when(yhMarket.stdDt.ne(item.getStandardDate()))
-                                    .then(yhMarket.close)
-                                    .otherwise(String.valueOf(0)).as("targetDateClose").length(),
-                            Expressions.cases()
-                                    .when(yhMarket.stdDt.eq(item.getStandardDate()))
-                                    .then(
-                                            Expressions.stringTemplate("({0} - {1}) / {1} * 100",
-                                                    yhMarket.close,   // targetDtClose
-                                                    Expressions.cases() // stdDtClose 값 설정
-                                                            .when(yhMarket.stdDt.eq(item.getStandardDate()))
-                                                            .then(yhMarket.close)
-                                                            .otherwise(String.valueOf(0)))
-                                    )
-                                    .otherwise(String.valueOf(0)).as("rateOfReturn").length()
-                    ))
-                    .from(yhStockCode)
-                    .where(yhStockCode.stockCd.eq(item.getItemId()))
-                    .leftJoin(yhMarket.yhStockCode, yhStockCode)
-                    .where(yhMarket.stdDt.in(item.getStandardDate(), targetDate))
-                    .fetchOne();
-
-        });
+//        // List에 있는 item들의 stockId와 기준일들을 한 번에 처리하도록 개선
+//        List<RateOfReturnDto> result = queryFactory
+//                .select(new QRateOfReturnDto(
+//                        yhStockCode.stockCd,
+//                        Expressions.cases()
+//                                .when(yhMarket.stdDt.eq(yhMarket.stdDt)) // 기준일에 대한 close 가격
+//                                .then(yhMarket.close.castToNum(Integer.class))
+//                                .otherwise(0).as("standardDateClose"),
+//                        Expressions.cases()
+//                                .when(yhMarket.stdDt.ne(yhMarket.stdDt)) // targetDate에 대한 close 가격
+//                                .then(yhMarket.close.castToNum(Integer.class))
+//                                .otherwise(0).as("targetDateClose"),
+//                        Expressions.numberTemplate(Integer.class, "({0} - {1}) / {1} * 100",
+//                                        yhMarket.close.castToNum(Integer.class), // targetDtClose
+//                                        Expressions.cases() // stdDtClose 값 설정
+//                                                .when(yhMarket.stdDt.eq(yhMarket.stdDt))
+//                                                .then(yhMarket.close.castToNum(Integer.class))
+//                                                .otherwise(0))
+//                                .as("rateOfReturn")
+//                ))
+//                .from(yhStockCode)
+//                .leftJoin(yhMarket).on(yhMarket.yhStockCode.eq(yhStockCode.stockCd))
+//                .where(yhStockCode.stockCd.in(v.stream().map(Watchlist::getItemId).collect(Collectors.toList())),
+//                        yhMarket.stdDt.in(v.stream().map(Watchlist::getStandardDate).collect(Collectors.toList()), targetDate))
+//                .fetch();
+//
+//        return result;
 
 //        List<RateOfReturnDto> results = queryFactory
 //                .select(new QRateOfReturnDto(
@@ -118,8 +133,6 @@ public class CustomYhStockCodeRepositoryImpl implements CustomYhStockCodeReposit
 //            BigDecimal endPrice = tuple.get("endPrice", BigDecimal.class);
 //            return new RateOfReturnDto(stockCode, startPrice, endPrice);
 //        }).collect(Collectors.toList());
-
-        return null;
     }
 
 }

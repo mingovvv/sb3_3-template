@@ -10,9 +10,9 @@ import java.util.Optional;
 
 public interface YhStockCodeRepository extends JpaRepository<YhStockCode, YhStockCode.CompositeKey>, CustomYhStockCodeRepository {
 
-    Optional<YhStockCodeRepository> findByStockCd(String stockCode);
+    Optional<YhStockCode> findByStockCd(String stockCode);
 
     @Query("SELECT y FROM YhStockCode y LEFT JOIN FETCH y.yhStockReturnRates yr WHERE yr.bsnsDays = :bsnsDays AND yr.stdDt = :stdDt")
-    Optional<YhStockCodeRepository> findStockReturnRate(@Param(value = "stockName") String stockName, @Param(value = "bsnsDays") String bsnsDays, @Param(value = "stdDt") String stdDt);
+    Optional<YhStockCode> findStockReturnRate(@Param(value = "stockName") String stockName, @Param(value = "bsnsDays") String bsnsDays, @Param(value = "stdDt") String stdDt);
 
 }
