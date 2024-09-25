@@ -2,7 +2,7 @@ package demo.template.sb3_3template.controller;
 
 import demo.template.common.model.BaseResponse;
 import demo.template.common.model.BaseResponseFactory;
-import demo.template.sb3_3template.dto.req.WatchlistReq;
+import demo.template.sb3_3template.dto.req.ConversationReq;
 import demo.template.sb3_3template.dto.res.WatchlistRes;
 import demo.template.sb3_3template.service.ConversationService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -25,14 +25,13 @@ public class ConversationController {
         this.conversationService = conversationService;
     }
 
-    @Operation(summary = "관심종목 등록 API", description = "관심종목으로 등록합니다.")
+    @Operation(summary = "질의하기 API", description = "질의합니다.")
     @ApiResponse(responseCode = "200", description = "HTTP Status Code is 200")
-    @PostMapping("/ddd")
-    public BaseResponse<WatchlistRes.PostWatch> postUserWatchlist(
-            @RequestBody @Valid WatchlistReq.PostWatch postWatch
+    @PostMapping("/conversation")
+    public BaseResponse<WatchlistRes.PostWatch> postConversation(
+            @RequestBody @Valid ConversationReq conversationReq
     ) {
-        return null;
-//        return BaseResponseFactory.create(watchlistService.postUserWatchlist(postWatch));
+        return BaseResponseFactory.create(conversationService.postConversation(conversationReq));
     }
 
 }

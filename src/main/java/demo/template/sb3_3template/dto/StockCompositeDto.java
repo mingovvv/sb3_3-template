@@ -8,18 +8,18 @@ public record StockCompositeDto(
 
         String stockName,
 
-        String indexWithStock,
+        String indexOfStock,
 
-        String sectorWithStock
+        String sectorOfStock
 
 ) {
 
     @QueryProjection
-    public StockCompositeDto(String stockId, String stockName, String indexWithStock, String sectorWithStock) {
+    public StockCompositeDto(String stockId, String stockName, String indexOfStock, String sectorOfStock) {
         this.stockId = stockId;
         this.stockName = stockName;
-        this.indexWithStock = indexWithStock;
-        this.sectorWithStock = sectorWithStock;
+        this.indexOfStock = indexOfStock;
+        this.sectorOfStock = sectorOfStock;
     }
 
 }

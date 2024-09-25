@@ -36,12 +36,12 @@ public record UserWatchlistRes(
         String sector,
 
         @Schema(description = "등락률", example = "1")
-        int fluctuationRate
+        int rateOfReturn
 
 ) {
 
         @Builder
-        public UserWatchlistRes(Long watchlistId, String marketCode, String itemId, String itemName, int position, String standardDate, String event, String index, String sector, int fluctuationRate) {
+        public UserWatchlistRes(Long watchlistId, String marketCode, String itemId, String itemName, int position, String standardDate, String event, String index, String sector, int rateOfReturn) {
                 this.watchlistId = watchlistId;
                 this.marketCode = marketCode;
                 this.itemId = itemId;
@@ -51,7 +51,7 @@ public record UserWatchlistRes(
                 this.event = event;
                 this.index = index;
                 this.sector = sector;
-                this.fluctuationRate = fluctuationRate;
+                this.rateOfReturn = rateOfReturn;
         }
 
         public static List<UserWatchlistRes> from(List<Watchlist> watchlist) {

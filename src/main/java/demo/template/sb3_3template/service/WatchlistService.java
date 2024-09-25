@@ -5,6 +5,7 @@ import demo.template.common.exception.AppErrorException;
 import demo.template.common.utils.DateUtil;
 import demo.template.sb3_3template.dto.EventOfSectorDto;
 import demo.template.sb3_3template.dto.EventOfStockDto;
+import demo.template.sb3_3template.dto.RateOfReturnDto;
 import demo.template.sb3_3template.dto.StockCompositeDto;
 import demo.template.sb3_3template.dto.req.WatchlistReq;
 import demo.template.sb3_3template.dto.res.MarketRes;
@@ -13,9 +14,11 @@ import demo.template.sb3_3template.dto.res.WatchlistRes;
 import demo.template.sb3_3template.entity.Watchlist;
 import demo.template.sb3_3template.entity.mart.InfostockSectorIndex;
 import demo.template.sb3_3template.entity.mart.YhEcoCode;
+import demo.template.sb3_3template.entity.raw.InfostockTheme;
 import demo.template.sb3_3template.enums.MarketType;
 import demo.template.sb3_3template.repository.WatchlistRepository;
 import demo.template.sb3_3template.repository.mart.*;
+import demo.template.sb3_3template.repository.raw.InfostockThemeRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -64,8 +67,9 @@ public class WatchlistService {
             case SECTOR -> {
 
                 // 전체 섹터 리스트 조회
-                List<InfostockSectorIndex> sectors = infostockSectorIndexRepository.findByStdDt(DateUtil.getMinusDay(1));
-                yield MarketRes.fromInfostockSectorIndex(sectors);
+                List<InfostockTheme> sectors = infostockThemeRepository.findAll();
+                List<InfostockSectorIndex> recommendation = infostockSectorIndexRepository.findTop10ByStdDtOrderByIdxCalMkCapAsc(DateUtil.getMinusDay(0));
+                yield MarketRes.fromInfostockSectorIndex(sectors, recommendation);
             }
 
         };
@@ -80,21 +84,20 @@ public class WatchlistService {
 
         grouped.forEach((k, v) -> {
 
-            if (k.equalsIgnoreCase("STOCK")) {
+            if (k.equalsIgnoreCase(MarketType.STOCK.name())) {
 
                 List<String> stockCodeList = v.stream().map(Watchlist::getItemId).toList();
 
-                // 동적쿼리로 변환
                 List<StockCompositeDto> stockWithIndexAndSector = yhStockCodeRepository.findStockWithIndexAndSector(stockCodeList);
 
                 // 이벤트 구하기
-                List<EventOfStockDto> stockWithEvent = infostockStockEventRepository.findEventOfStock(stockCodeList);
+                List<EventOfStockDto> eventOfStock = infostockStockEventRepository.findEventOfStock(stockCodeList);
 
                 // 증감율 구하기
-                // todo
+                List<RateOfReturnDto> rateOfReturn = yhStockCodeRepository.findStockRateOfReturn(v, DateUtil.getMinusDay(1));
 
 
-            } else if (k.equalsIgnoreCase("INDEX")) {
+            } else if (k.equalsIgnoreCase(MarketType.INDEX.name())) {
 
                 // 증감율 구하기
                 // todo
@@ -121,9 +124,12 @@ public class WatchlistService {
     public WatchlistRes.PostWatch postUserWatchlist(WatchlistReq.PostWatch postWatch) {
 
         switch (MarketType.findByType(postWatch.marketCode())) {
-            case STOCK -> yhStockCodeRepository.findByStockCd(postWatch.itemId()).orElseThrow(() -> AppErrorException.of(ResultCode.Error.INVALID_VALUE, "The 'itemId' does not exist."));
-            case INDEX -> yhEcoCodeRepository.findByTypeAndEcoCode("index", postWatch.itemId()).orElseThrow(() -> AppErrorException.of(ResultCode.Error.INVALID_VALUE, "The 'itemId' does not exist."));
-            // todo 섹터 정규화된 테이블 있는지 확인
+            case STOCK ->
+                    yhStockCodeRepository.findByStockCd(postWatch.itemId()).orElseThrow(() -> AppErrorException.of(ResultCode.Error.INVALID_VALUE, "The 'itemId' does not exist."));
+            case INDEX ->
+                    yhEcoCodeRepository.findByTypeAndEcoCode("index", postWatch.itemId()).orElseThrow(() -> AppErrorException.of(ResultCode.Error.INVALID_VALUE, "The 'itemId' does not exist."));
+            case SECTOR ->
+                    infostockThemeRepository.findById(postWatch.itemId()).orElseThrow(() -> AppErrorException.of(ResultCode.Error.INVALID_VALUE, "The 'itemId' does not exist."));
         }
 
         watchlistRepository.findByUserIdAndTypeCodeAndItemId(postWatch.userId(), postWatch.marketCode(), postWatch.itemId())

@@ -8,6 +8,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @IdClass(YhStockCode.CompositeKey.class)
@@ -37,6 +39,9 @@ public class YhStockCode extends MartBaseEntity {
 
     @Column(name = "industry")
     private String industry;
+
+    @OneToMany(mappedBy = "yhStockCode")
+    private List<YhStockReturnRate> yhStockReturnRates = new ArrayList<>();
 
     @NoArgsConstructor
     @EqualsAndHashCode

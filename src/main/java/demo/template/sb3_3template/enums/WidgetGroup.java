@@ -2,29 +2,43 @@ package demo.template.sb3_3template.enums;
 
 import lombok.Getter;
 
+import java.util.Arrays;
+
 import static demo.template.sb3_3template.enums.WidgetGroup.Widget.*;
 
 @Getter
 public enum WidgetGroup {
 
-    WIDGET_GROUP_1(1, WIDGET_5, WIDGET_6, WIDGET_7, WIDGET_8);
+    WIDGET_GROUP_1(1, true, WIDGET_5, WIDGET_6, WIDGET_7, WIDGET_8);
 
-    private int wgNo;
+    private int wedgetGroupNo;
+    private boolean isUsedCommonWidget;
     private Widget[] widgets;
 
-    WidgetGroup(int wgNo, Widget... widget) {
-        this.wgNo = wgNo;
-        this.widgets = widget;
+    WidgetGroup(int wedgetGroupNo, boolean isUsedCommonWidget, Widget... widgets) {
+        this.wedgetGroupNo = wedgetGroupNo;
+        this.isUsedCommonWidget = isUsedCommonWidget;
+        this.widgets = widgets;
     }
 
-    enum Widget {
+    public static WidgetGroup findWidgetGroup(int wedgetGroupNo) {
+        return Arrays.stream(WidgetGroup.values())
+               .filter(wg -> wg.getWedgetGroupNo() == wedgetGroupNo)
+               .findFirst()
+               .orElseThrow(() -> new IllegalArgumentException("WidgetGroup not found."));
+    }
 
-        WIDGET_5(5, """
-                최근 {} 관련 주요 뉴스는 {} 이에요.
-                비슷한 뉴스가 있었을 때, {} 주가는 평균적으로 다음날까지 {} 올랐고, {}보다 {} 성과를 보였어요.
-                """, """
-                최근 {} 관련 주요 뉴스는 {} 이에요.
-                비슷한 뉴스가 있었을 때, {} 주가는 평균적으로 다음날까지 {} 올랐어요.
+    @Getter
+    public enum Widget {
+
+        WIDGET_5(5,
+                """
+                최근 {#1} 관련 주요 뉴스는 {#2} 이에요.
+                비슷한 뉴스가 있었을 때, {#4} 주가는 평균적으로 다음날까지 {#4} 올랐고, {#5}보다 {#6} 성과를 보였어요.
+                """,
+                """
+                최근 {#1} 관련 주요 뉴스는 {#2} 이에요.
+                비슷한 뉴스가 있었을 때, {#3} 주가는 평균적으로 다음날까지 {#4} 올랐어요.
                 """),
         WIDGET_6(6, """
                 지금까지 뉴스를 분석해보면 {}의 주가는 아래 이벤트가 중요해요.

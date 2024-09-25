@@ -3,12 +3,12 @@ package demo.template.sb3_3template.dto.res;
 import demo.template.sb3_3template.dto.StockCompositeDto;
 import demo.template.sb3_3template.entity.mart.InfostockSectorIndex;
 import demo.template.sb3_3template.entity.mart.YhEcoCode;
+import demo.template.sb3_3template.entity.raw.InfostockTheme;
 import demo.template.sb3_3template.enums.IndexKrType;
 import demo.template.sb3_3template.enums.MarketType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 public record MarketRes(
@@ -58,15 +58,15 @@ public record MarketRes(
                         return MarketObject.builder()
                                 .itemId(stockCompositeDto.stockId())
                                 .itemName(stockCompositeDto.stockName())
-                                .index(IndexKrType.findById(stockCompositeDto.indexWithStock()).name())
-                                .sector(stockCompositeDto.sectorWithStock())
+                                .index(IndexKrType.findByExcngId(stockCompositeDto.indexOfStock()).name())
+                                .sector(stockCompositeDto.sectorOfStock())
                                 .build();
                 }
 
-                public static MarketObject fromInfostockSectorIndex(InfostockSectorIndex infostockSectorIndex) {
+                public static MarketObject fromInfostockSectorIndex(InfostockTheme infostockTheme) {
                         return MarketObject.builder()
-                                .itemId(infostockSectorIndex.getThemeCd())
-                                .itemName(infostockSectorIndex.getThemeNm())
+                                .itemId(infostockTheme.getThemeCd())
+                                .itemName(infostockTheme.getThemeNm())
                                 .build();
                 }
 
@@ -78,7 +78,7 @@ public record MarketRes(
                         return stockComposite.stream().map(MarketObject::fromStockCompositeDto).toList();
                 }
 
-                public static List<MarketObject> fromInfostockSectorIndex(List<InfostockSectorIndex> sectors) {
+                public static List<MarketObject> fromInfostockSectorIndex(List<InfostockTheme> sectors) {
                         return sectors.stream().map(MarketObject::fromInfostockSectorIndex).toList();
                 }
 
@@ -106,24 +106,25 @@ public record MarketRes(
                         .build();
         }
 
-        public static MarketRes fromInfostockSectorIndex(List<InfostockSectorIndex> sectors) {
+        public static MarketRes fromInfostockSectorIndex(List<InfostockTheme> sectors, List<InfostockSectorIndex> recommendation) {
                 return MarketRes.builder()
                         .marketCode(MarketType.SECTOR.name())
                         .marketObjects(MarketObject.fromInfostockSectorIndex(sectors))
-                        .recommendation(findTop10Recommendation(sectors))
+                        .recommendation(findTop10Recommendation(recommendation))
                         .build();
         }
 
         private static List<String> findTop10Recommendation(List<InfostockSectorIndex> sectors) {
-                return sectors.stream()
-                        .sorted((s1, s2) -> {
-                                BigDecimal value1 = new BigDecimal(s1.getIdxCalMkCap());
-                                BigDecimal value2 = new BigDecimal(s2.getIdxCalMkCap());
-                                return value2.compareTo(value1);
-                        })
-                       .limit(10)
-                       .map(InfostockSectorIndex::getThemeNm)
-                       .toList();
+                return sectors.stream().map(InfostockSectorIndex::getThemeNm).toList();
+//                return sectors.stream()
+//                        .sorted((s1, s2) -> {
+//                                BigDecimal value1 = new BigDecimal(s1.getIdxCalMkCap());
+//                                BigDecimal value2 = new BigDecimal(s2.getIdxCalMkCap());
+//                                return value2.compareTo(value1);
+//                        })
+//                       .limit(10)
+//                       .map(InfostockSectorIndex::getThemeNm)
+//                       .toList();
         }
 
 }

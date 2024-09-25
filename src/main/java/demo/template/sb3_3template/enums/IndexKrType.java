@@ -10,26 +10,35 @@ import java.util.stream.Stream;
 @Getter
 public enum IndexKrType {
 
-    KOSPI("1", "코스피"),
-    KOSDAQ("7", "코스닥");
+    KOSPI("1", "코스피", "703000"),
+    KOSDAQ("7", "코스닥", "940029");
 
     private String excngId;
     private String excngName;
+    private String ecoCode;
 
-    IndexKrType(String excngId, String excngName) {
+    IndexKrType(String excngId, String excngName, String ecoCode) {
         this.excngId = excngId;
         this.excngName = excngName;
+        this.ecoCode = ecoCode;
     }
 
-    private static final Map<String, IndexKrType> INDEX_KR_TYPE_MAP;
+    private static final Map<String, IndexKrType> INDEX_KR_TYPE_BY_EXCNGID_MAP;
+    private static final Map<String, IndexKrType> INDEX_KR_TYPE_BY_ECOCODE_MAP;
 
     static {
-        INDEX_KR_TYPE_MAP = Stream.of(IndexKrType.values())
+        INDEX_KR_TYPE_BY_EXCNGID_MAP = Stream.of(IndexKrType.values())
                 .collect(Collectors.toMap(IndexKrType::getExcngId, Function.identity()));
+        INDEX_KR_TYPE_BY_ECOCODE_MAP = Stream.of(IndexKrType.values())
+                .collect(Collectors.toMap(IndexKrType::getEcoCode, Function.identity()));
     }
 
-    public static IndexKrType findById(String excngId) {
-        return INDEX_KR_TYPE_MAP.getOrDefault(excngId, null);
+    public static IndexKrType findByExcngId(String excngId) {
+        return INDEX_KR_TYPE_BY_EXCNGID_MAP.getOrDefault(excngId, null);
+    }
+
+    public static IndexKrType findByEcoCode(String ecoCode) {
+        return INDEX_KR_TYPE_BY_ECOCODE_MAP.getOrDefault(ecoCode, null);
     }
 
 }

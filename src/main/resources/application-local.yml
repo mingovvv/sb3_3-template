@@ -23,5 +23,11 @@ spring:
 logging:
   config: classpath:logback-local.xml
 
+api:
+  inference-pipeline:
+    url: http://localhost:8081
+    connection-timeout: 1s
+    read-timeout: 20s
+
 aes:
   secret-key: 4e6f0d8e28d0f2fa74e6c6d8e38a9f6b

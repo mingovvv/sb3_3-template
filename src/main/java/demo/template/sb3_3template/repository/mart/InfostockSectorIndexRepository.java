@@ -8,6 +8,6 @@ import java.util.List;
 
 public interface InfostockSectorIndexRepository extends JpaRepository<InfostockSectorIndex, InfostockSectorIndex.CompositeKey>, CustomInfostockSectorEventRepository {
 
-    List<InfostockSectorIndex> findByStdDt(String stdDt);
+    List<InfostockSectorIndex> findTop10ByStdDtOrderByIdxCalMkCapAsc(String stdDt);
 
 }

@@ -4,26 +4,25 @@ import demo.template.sb3_3template.entity.common.MartBaseEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
-@IdClass(YhStockReturnRate.CompositeKey.class)
+@IdClass(YhEcoReturnRate.CompositeKey.class)
+@Getter
 @Entity
-@Table(name = "stock_return_rate")
+@Table(name = "yh_eco_return_rate")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class YhStockReturnRate extends MartBaseEntity {
+public class YhEcoReturnRate extends MartBaseEntity {
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumns({
-            @JoinColumn(name = "isin", referencedColumnName = "isin"),
-            @JoinColumn(name = "stock_cd", referencedColumnName = "stock_cd")
-    })
-    private YhStockCode yhStockCode;
+    @ManyToOne
+    @JoinColumn(name = "eco_cd", referencedColumnName = "eco_cd")
+    private YhEcoCode yhEcoCode;
 
     @Id
     @Column(name = "bsns_days")
-    private Byte bsnsDays;
+    private String bsnsDays;
 
     @Id
     @Column(name = "std_dt")
@@ -33,12 +32,12 @@ public class YhStockReturnRate extends MartBaseEntity {
     private String cmpDt;
 
     @Column(name = "return_rate")
-    private String returnRate;
+    private Double returnRate;
 
     @NoArgsConstructor
     @EqualsAndHashCode
     static public class CompositeKey implements Serializable {
-        private Byte bsnsDays;
+        private String bsnsDays;
         private String stdDt;
     }
 
