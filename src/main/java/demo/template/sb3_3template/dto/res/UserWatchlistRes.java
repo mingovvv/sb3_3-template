@@ -1,14 +1,11 @@
 package demo.template.sb3_3template.dto.res;
 
-import demo.template.sb3_3template.dto.EventOfStockDto;
-import demo.template.sb3_3template.dto.RateOfReturnDto;
 import demo.template.sb3_3template.dto.StockCompositeDto;
 import demo.template.sb3_3template.entity.Watchlist;
 import demo.template.sb3_3template.enums.IndexKrType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 
-import java.util.List;
 import java.util.Map;
 
 public record UserWatchlistRes(
@@ -71,6 +68,31 @@ public record UserWatchlistRes(
                 .rateOfReturn(rateMap.get(watchlist.getItemId()))
                 .index(IndexKrType.findByExcngId(stockMap.getOrDefault(watchlist.getItemId(), null).indexOfStock()).name())
                 .sector(stockMap.getOrDefault(watchlist.getItemId(), null).sectorOfStock())
+                .build();
+    }
+
+    public static UserWatchlistRes from(Watchlist watchlist, Map<String, Integer> rateMap) {
+        return UserWatchlistRes.builder()
+                .watchlistId(watchlist.getWatchlistId())
+                .marketCode(watchlist.getTypeCode())
+                .itemId(watchlist.getItemId())
+                .itemName(watchlist.getItemName())
+                .position(watchlist.getPosition())
+                .standardDate(watchlist.getStandardDate())
+                .rateOfReturn(rateMap.get(watchlist.getItemId()))
+                .build();
+    }
+
+    public static UserWatchlistRes from(Watchlist watchlist, Map<String, String> eventMap, Map<String, Integer> rateMap) {
+        return UserWatchlistRes.builder()
+                .watchlistId(watchlist.getWatchlistId())
+                .marketCode(watchlist.getTypeCode())
+                .itemId(watchlist.getItemId())
+                .itemName(watchlist.getItemName())
+                .position(watchlist.getPosition())
+                .standardDate(watchlist.getStandardDate())
+                .event(eventMap.get(watchlist.getItemId()))
+                .rateOfReturn(rateMap.get(watchlist.getItemId()))
                 .build();
     }
 

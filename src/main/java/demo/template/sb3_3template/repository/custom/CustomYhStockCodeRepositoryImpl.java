@@ -3,17 +3,17 @@ package demo.template.sb3_3template.repository.custom;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import demo.template.sb3_3template.dto.QRateOfReturnDto;
-import demo.template.sb3_3template.dto.QStockCompositeDto;
-import demo.template.sb3_3template.dto.RateOfReturnDto;
-import demo.template.sb3_3template.dto.StockCompositeDto;
+import demo.template.sb3_3template.dto.*;
 import demo.template.sb3_3template.entity.Watchlist;
+import demo.template.sb3_3template.entity.mart.YhStockCode;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import static demo.template.sb3_3template.entity.mart.QYhMarket.yhMarket;
 import static demo.template.sb3_3template.entity.mart.QYhStockCode.yhStockCode;
+import static demo.template.sb3_3template.entity.mart.QYhStockReturnRate.yhStockReturnRate;
 import static demo.template.sb3_3template.entity.raw.QInfostockTheme.infostockTheme;
 import static demo.template.sb3_3template.entity.raw.QInfostockThemeStock.infostockThemeStock;
 
@@ -66,13 +66,19 @@ public class CustomYhStockCodeRepositoryImpl implements CustomYhStockCodeReposit
                                 .then(yhMarket.close.castToNum(Integer.class))
                                 .otherwise(0).as("targetDateClose"),
                         Expressions.numberTemplate(Integer.class, "({0} - {1}) / {1} * 100",
-                                        yhMarket.close.castToNum(Integer.class), // targetDtClose
-                                        Expressions.cases() // stdDtClose 값 설정
-                                                .when(yhMarket.stdDt.eq(yhMarket.stdDt))
-                                                .then(yhMarket.close.castToNum(Integer.class))
-                                                .otherwise(0))
-                                .as("rateOfReturn")
-                ))
+                                yhMarket.close.castToNum(Integer.class), // targetDtClose
+                                // 타겟일자 종가
+                                Expressions.cases()
+                                        .when(yhMarket.stdDt.eq(targetDate))
+                                        .then(yhMarket.close.castToNum(Integer.class))
+                                        .otherwise(0),
+                                // 기준일자 종가
+                                Expressions.cases()
+                                        .when(yhMarket.stdDt.eq(item.getStandardDate()))
+                                        .then(yhMarket.close.castToNum(Integer.class))
+                                        .otherwise(0)
+                                        .as("rateOfReturn")
+                )))
                 .from(yhStockCode)
                 .where(yhStockCode.stockCd.eq(item.getItemId()))
                 .leftJoin(yhMarket.yhStockCode, yhStockCode)
@@ -133,6 +139,29 @@ public class CustomYhStockCodeRepositoryImpl implements CustomYhStockCodeReposit
 //            BigDecimal endPrice = tuple.get("endPrice", BigDecimal.class);
 //            return new RateOfReturnDto(stockCode, startPrice, endPrice);
 //        }).collect(Collectors.toList());
+    }
+
+    @Override
+    public Optional<StockRateOfReturnDto> findStockRateOfReturn(String stockName, int bsnsDays, String stdDt) {
+
+        YhStockCode yhstock = queryFactory.
+                selectFrom(yhStockCode)
+                .where(yhStockCode.stockNameKr.eq(stockName))
+                .fetchOne();
+
+        StockRateOfReturnDto stockRateOfReturnDto = queryFactory
+                .select(new QStockRateOfReturnDto(
+                        yhStockReturnRate.yhStockCode.excngId,
+                        yhStockReturnRate.yhStockCode.stockCd,
+                        yhStockReturnRate.returnRate
+                ))
+                .from(yhStockReturnRate)
+                .where(yhStockReturnRate.yhStockCode.eq(yhstock)
+                        .and(yhStockReturnRate.bsnsDays.eq(bsnsDays).and(yhStockReturnRate.stdDt.eq(stdDt))))
+                .fetchOne();
+
+        return Optional.ofNullable(stockRateOfReturnDto);
+
     }
 
 }

@@ -3,10 +3,12 @@ package demo.template.sb3_3template.entity.mart;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
+@Getter
 @Entity
 @Table(name = "yh_market")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -56,12 +58,5 @@ public class YhMarket {
 
     @Column(name = "divd_yield")
     private String divdYield;
-
-    @NoArgsConstructor
-    @EqualsAndHashCode
-    static protected class CompositeKey implements Serializable {
-        private String isin;
-        private String stockCd;
-    }
 
 }

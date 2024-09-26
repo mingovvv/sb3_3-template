@@ -1,6 +1,8 @@
 package demo.template.sb3_3template.service;
 
+import demo.template.sb3_3template.dto.StockRateOfReturnDto;
 import demo.template.sb3_3template.entity.mart.YhEcoReturnRate;
+import demo.template.sb3_3template.enums.IndexKrType;
 import demo.template.sb3_3template.enums.Tag;
 import demo.template.sb3_3template.enums.WidgetGroup;
 import demo.template.sb3_3template.http.dto.InferencePipelineRes;
@@ -24,38 +26,62 @@ public class WidgetGenerator {
         this.yhStockReturnRateRepository = yhStockReturnRateRepository;
     }
 
+    /**
+     *
+     * @param inferencePipelineRes 추론 파이프라인 응답 객체
+     * @param Object
+     */
     public void generateWidget(InferencePipelineRes inferencePipelineRes, String Object) {
 
         switch (WidgetGroup.findWidgetGroup(inferencePipelineRes.widgetGroup())) {
 
             case WIDGET_GROUP_1 -> {
 
+                // 태그 추출하기
                 Optional<String> tagName = inferencePipelineRes.questionMeta().ner().entities().stream().map(InferencePipelineRes.QuestionMeta.Ner.Entities::tag).findFirst();
 
+                // 위젯 그룹 1번 데이터 가져오기
                 WidgetGroup.Widget[] widgets = WidgetGroup.WIDGET_GROUP_1.getWidgets();
-                WidgetGroup.Widget widget5_1 = widgets[0];
-                WidgetGroup.Widget widget5_2 = widgets[1];
+
 
                 tagName.ifPresent(tag -> {
 
-                    Tag tag1 = Tag.findByName(tagName.get());
                     Optional<String> entityName = inferencePipelineRes.questionMeta().ner().entities().stream().map(InferencePipelineRes.QuestionMeta.Ner.Entities::entity).findFirst();
 
-                    if (tag1 == Tag.STOCK) {
+                    if (Tag.findByName(tagName.get()) == Tag.STOCK) {
 
-                        // todo 종목의 타겟일+1D 변동률 구하기
-//                        YhStockCodeRepository stockReturnRate = yhStockCodeRepository.findStockReturnRate(entityName.get(), "1", "20240505").orElse(null);
+                        // 템플릿 가져오기
+                        WidgetGroup.Widget widget5 = widgets[0];
 
-                        // todo 지수의 타겟일+1D 변동률 구하기
-//                        YhEcoReturnRate indexReturnRate = yhEcoReturnRateRepository.findByEcoCodeAndBsnsDaysAndStdDt("KOSPI", "1", "20240505").orElse(null);
+                        // 종목의 타겟일 기준 D+1일 변동률 조회
+                        StockRateOfReturnDto stockRateOfReturnDto = yhStockCodeRepository.findStockRateOfReturn(entityName.get(), 1, "20240505").orElse(StockRateOfReturnDto.ofEmpty());
+
+                        // 종목이 속한 지수의 기준 D+1일 변동률 조회
+                        YhEcoReturnRate yhEcoReturnRate = yhEcoReturnRateRepository.findByEcoCodeAndBsnsDaysAndStdDt(IndexKrType.findByExcngId(stockRateOfReturnDto.excngId()).getEcoCode(), 1, "20240505").orElse(YhEcoReturnRate.ofEmpty());
+
+                        String temp = widget5.getTemplate()[0];
+                        String entity = entityName.get();
+                        String date = "";
+                        String event = "";
+                        String stockReturn = String.valueOf(stockRateOfReturnDto.returnRate());
+                        String excngName = IndexKrType.findByExcngId(stockRateOfReturnDto.excngId()).getExcngName();
+                        String excessReturn= String.valueOf(yhEcoReturnRate.getReturnRate() - stockRateOfReturnDto.returnRate());
+
+                        WidgetObjCreator.createWidgetObject(widget5, entityName.get(), date, event, stockReturn, excngName, excessReturn);
 
 
-                    } else if (tag1 == Tag.INDEX) {
+                    } else if (Tag.findByName(tagName.get()) == Tag.INDEX) {
+
+                        // 템플릿 가져오기
+                        WidgetGroup.Widget widget5_2 = widgets[1];
 
                         // todo 지수의 타겟일+1D 변동률 구하기
 
 
                     } else {
+
+                        // 템플릿 가져오기
+                        WidgetGroup.Widget widget5_2 = widgets[1];
 
                         // todo 섹터의 타겟일+1D 변동률 구하기
 

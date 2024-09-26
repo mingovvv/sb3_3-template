@@ -12,7 +12,7 @@ public interface YhStockCodeRepository extends JpaRepository<YhStockCode, YhStoc
 
     Optional<YhStockCode> findByStockCd(String stockCode);
 
-    @Query("SELECT y FROM YhStockCode y LEFT JOIN FETCH y.yhStockReturnRates yr WHERE yr.bsnsDays = :bsnsDays AND yr.stdDt = :stdDt")
-    Optional<YhStockCode> findStockReturnRate(@Param(value = "stockName") String stockName, @Param(value = "bsnsDays") String bsnsDays, @Param(value = "stdDt") String stdDt);
+//    @Query("SELECT y FROM YhStockCode y LEFT JOIN FETCH y.yhStockReturnRates yr WHERE y.stockNameKr = :stockName AND yr.bsnsDays = :bsnsDays AND yr.stdDt = :stdDt")
+//    Optional<YhStockCode> findStockReturnRate(@Param(value = "stockName") String stockName, @Param(value = "bsnsDays") String bsnsDays, @Param(value = "stdDt") String stdDt);
 
 }

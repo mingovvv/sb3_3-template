@@ -2,10 +2,7 @@ package demo.template.sb3_3template.entity.mart;
 
 import demo.template.sb3_3template.entity.common.MartBaseEntity;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.io.Serializable;
 
@@ -21,8 +18,8 @@ public class YhEcoReturnRate extends MartBaseEntity {
     private YhEcoCode yhEcoCode;
 
     @Id
-    @Column(name = "bsns_days")
-    private String bsnsDays;
+    @Column(name = "bsns_days", columnDefinition = "TINYINT")
+    private Integer bsnsDays;
 
     @Id
     @Column(name = "std_dt")
@@ -39,6 +36,19 @@ public class YhEcoReturnRate extends MartBaseEntity {
     static public class CompositeKey implements Serializable {
         private String bsnsDays;
         private String stdDt;
+    }
+
+    @Builder
+    public YhEcoReturnRate(YhEcoCode yhEcoCode, Integer bsnsDays, String stdDt, String cmpDt, Double returnRate) {
+        this.yhEcoCode = yhEcoCode;
+        this.bsnsDays = bsnsDays;
+        this.stdDt = stdDt;
+        this.cmpDt = cmpDt;
+        this.returnRate = returnRate;
+    }
+
+    static public YhEcoReturnRate ofEmpty() {
+        return YhEcoReturnRate.builder().build();
     }
 
 }

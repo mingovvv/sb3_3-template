@@ -16,6 +16,7 @@ import lombok.NoArgsConstructor;
 public class YhEcoCode extends MartBaseEntity {
 
     @Id
+    @Column(name = "eco_cd")
     private String ecoCode;
 
     private String type;

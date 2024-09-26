@@ -25,7 +25,7 @@ public class ConversationController {
         this.conversationService = conversationService;
     }
 
-    @Operation(summary = "질의하기 API", description = "질의합니다.")
+    @Operation(summary = "질의하기 API", description = "주식 관련 문의를 질의합니다.")
     @ApiResponse(responseCode = "200", description = "HTTP Status Code is 200")
     @PostMapping("/conversation")
     public BaseResponse<WatchlistRes.PostWatch> postConversation(

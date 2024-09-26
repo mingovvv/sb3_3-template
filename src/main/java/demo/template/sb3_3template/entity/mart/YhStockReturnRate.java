@@ -22,8 +22,8 @@ public class YhStockReturnRate extends MartBaseEntity {
     private YhStockCode yhStockCode;
 
     @Id
-    @Column(name = "bsns_days")
-    private Byte bsnsDays;
+    @Column(name = "bsns_days", columnDefinition = "TINYINT")
+    private Integer bsnsDays;
 
     @Id
     @Column(name = "std_dt")
@@ -33,7 +33,7 @@ public class YhStockReturnRate extends MartBaseEntity {
     private String cmpDt;
 
     @Column(name = "return_rate")
-    private String returnRate;
+    private Double returnRate;
 
     @NoArgsConstructor
     @EqualsAndHashCode

@@ -27,10 +27,16 @@ public class ConversationService {
 
         // todo 대화 저장
         // todo 대화 상세 저장
-        // todo inferencePipelineApi 호출
+
+        // 추론 파이프라인 호출
         InferencePipelineRes inferencePipelineRes = inferencePipelineApi.postInferenceExecution(InferencePipelineReq.of(conversationReq.question()));
 
+        // 위젯 검증
         List<Integer> validatedWidgetNo = widgetValidator.validate(inferencePipelineRes);
+
+        // 위젯 생성
+
+        // todo 대화 상세 업데이트
 
         return null;
 

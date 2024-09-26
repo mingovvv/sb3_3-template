@@ -38,8 +38,9 @@ public class WatchlistService {
     private final WatchlistRepository watchlistRepository;
     private final InfostockStockEventRepository infostockStockEventRepository;
     private final InfostockSectorEventRepository infostockSectorEventRepository;
+    private final YhEcoReturnRateRepository yhEcoReturnRateRepository;
 
-    public WatchlistService(YhStockCodeRepository yhStockCodeRepository, YhEcoCodeRepository yhEcoCodeRepository, InfostockThemeRepository infostockThemeRepository, InfostockSectorIndexRepository infostockSectorIndexRepository, WatchlistRepository watchlistRepository, InfostockStockEventRepository infostockStockEventRepository, InfostockSectorEventRepository infostockSectorEventRepository) {
+    public WatchlistService(YhStockCodeRepository yhStockCodeRepository, YhEcoCodeRepository yhEcoCodeRepository, InfostockThemeRepository infostockThemeRepository, InfostockSectorIndexRepository infostockSectorIndexRepository, WatchlistRepository watchlistRepository, InfostockStockEventRepository infostockStockEventRepository, InfostockSectorEventRepository infostockSectorEventRepository, YhEcoReturnRateRepository yhEcoReturnRateRepository) {
         this.yhStockCodeRepository = yhStockCodeRepository;
         this.yhEcoCodeRepository = yhEcoCodeRepository;
         this.infostockThemeRepository = infostockThemeRepository;
@@ -47,6 +48,7 @@ public class WatchlistService {
         this.watchlistRepository = watchlistRepository;
         this.infostockStockEventRepository = infostockStockEventRepository;
         this.infostockSectorEventRepository = infostockSectorEventRepository;
+        this.yhEcoReturnRateRepository = yhEcoReturnRateRepository;
     }
 
     /**
@@ -121,17 +123,24 @@ public class WatchlistService {
             } else if (k.equalsIgnoreCase(MarketType.INDEX.name())) {
 
                 // 증감율 구하기
-                // todo
+                List<RateOfReturnDto> rateOfReturn = yhEcoCodeRepository.findIndexRateOfReturn(v, DateUtil.getMinusDay(1), "날짜타입");
+                Map<String, Integer> rateMap = rateOfReturn.stream().collect(Collectors.toMap(RateOfReturnDto::code, RateOfReturnDto::rateOfReturn));
+
+                v.stream().map(watch -> UserWatchlistRes.from(watch, rateMap)).forEach(totalWatchlist::add);
 
             } else {
 
                 List<String> sectorCodeList = v.stream().map(Watchlist::getItemId).toList();
 
                 // 이벤트 구하기
-                List<EventOfSectorDto> stockWithEvent = infostockSectorEventRepository.findEventOfSector(sectorCodeList);
+                List<EventOfSectorDto> eventOfSector = infostockSectorEventRepository.findEventOfSector(sectorCodeList);
+                Map<String, String> eventMap = eventOfSector.stream().collect(Collectors.toMap(EventOfSectorDto::sectorCode, EventOfSectorDto::event));
 
                 // 증감율 구하기
-                // todo
+                List<RateOfReturnDto> rateOfReturn = infostockSectorIndexRepository.findSectorRateOfReturn(v, DateUtil.getMinusDay(1));
+                Map<String, Integer> rateMap = rateOfReturn.stream().collect(Collectors.toMap(RateOfReturnDto::code, RateOfReturnDto::rateOfReturn));
+
+                v.stream().map(watch -> UserWatchlistRes.from(watch, eventMap, rateMap)).forEach(totalWatchlist::add);
 
             }
 
