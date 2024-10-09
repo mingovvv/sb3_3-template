@@ -5,6 +5,8 @@ import demo.template.sb3_3template.dto.res.WatchlistRes;
 import demo.template.sb3_3template.http.InferencePipelineApi;
 import demo.template.sb3_3template.http.dto.InferencePipelineReq;
 import demo.template.sb3_3template.http.dto.InferencePipelineRes;
+import demo.template.sb3_3template.model.WidgetResponse;
+import demo.template.sb3_3template.service.widget.WidgetGenerator;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,31 +16,29 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class ConversationService {
 
+    private final WidgetGenerator widgetGenerator;
     private final WidgetValidator widgetValidator;
     private final InferencePipelineApi inferencePipelineApi;
 
-    public ConversationService(InferencePipelineApi inferencePipelineApi, WidgetValidator widgetValidator) {
+    public ConversationService(InferencePipelineApi inferencePipelineApi, WidgetValidator widgetValidator, WidgetGenerator widgetGenerator) {
         this.inferencePipelineApi = inferencePipelineApi;
         this.widgetValidator = widgetValidator;
+        this.widgetGenerator = widgetGenerator;
     }
 
     @Transactional
-    public WatchlistRes.PostWatch postConversation(ConversationReq conversationReq) {
-
-        // todo 대화 저장
-        // todo 대화 상세 저장
+    public WidgetResponse postConversation(ConversationReq conversationReq) {
 
         // 추론 파이프라인 호출
         InferencePipelineRes inferencePipelineRes = inferencePipelineApi.postInferenceExecution(InferencePipelineReq.of(conversationReq.question()));
 
-        // 위젯 검증
+        // 위젯그룹 검증
         List<Integer> validatedWidgetNo = widgetValidator.validate(inferencePipelineRes);
 
         // 위젯 생성
+        WidgetResponse widgetResponse = widgetGenerator.generateWidget(inferencePipelineRes, validatedWidgetNo);
 
-        // todo 대화 상세 업데이트
-
-        return null;
+        return widgetResponse;
 
     }
 

@@ -9,7 +9,8 @@ import static demo.template.sb3_3template.enums.WidgetGroup.Widget.*;
 @Getter
 public enum WidgetGroup {
 
-    WIDGET_GROUP_1(1, true, WIDGET_5, WIDGET_6, WIDGET_7, WIDGET_8);
+    WIDGET_GROUP_1(1, true, WIDGET_5, WIDGET_6, WIDGET_7, WIDGET_8),
+    WIDGET_GROUP_2(2, true, WIDGET_5, WIDGET_6, WIDGET_7, WIDGET_8);
 
     private int wedgetGroupNo;
     private boolean isUsedCommonWidget;
