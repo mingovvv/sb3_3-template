@@ -5,6 +5,11 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.querydsl.jpa.impl.JPAUpdateClause;
 import demo.template.common.utils.DateUtil;
 import demo.template.sb3_3template.dto.StockCompositeDto;
+import demo.template.sb3_3template.dto.res.FinancialDictionaryDto;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -54,6 +59,29 @@ public class CustomWatchlistRepositoryImpl implements CustomWatchlistRepository 
 
         updateClause.execute();
 
+    }
+
+    @Override
+    public Page<FinancialDictionaryDto> findByCondition(int page, int size) {
+
+        Pageable pageable = PageRequest.of(page - 1, size);
+
+        List<FinancialDictionary> content = queryFactory
+                .select(new QFinancialDictionaryDto(
+                        financialDictionary.id
+                        financialDictionary.word
+                ))
+                .from(financialDictionary)
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .orderBy()
+                .fetch();
+
+        JPQLQuery<Long> countQuery = queryFactory
+                .select(financialDictionary.count())
+                .from(financialDictionary);
+
+        return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchOne);
     }
 
 }
