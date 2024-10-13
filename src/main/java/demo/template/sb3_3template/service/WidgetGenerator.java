@@ -67,7 +67,7 @@ public class WidgetGenerator {
                         String excngName = IndexKrType.findByExcngId(stockRateOfReturnDto.excngId()).getExcngName();
                         String excessReturn= String.valueOf(yhEcoReturnRate.getReturnRate() - stockRateOfReturnDto.returnRate());
 
-                        WidgetObjCreator.createWidgetObject(widget5, entityName.get(), date, event, stockReturn, excngName, excessReturn);
+//                        WidgetObjCreator.createWidgetObject(widget5, entityName.get(), date, event, stockReturn, excngName, excessReturn);
 
 
                     } else if (Tag.findByName(tagName.get()) == Tag.INDEX) {

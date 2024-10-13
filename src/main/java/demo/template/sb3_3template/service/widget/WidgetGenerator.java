@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-@Service
+@Service(value = "widgetGenerator2")
 public class WidgetGenerator {
 
     private final Map<WidgetGroup, WidgetGeneratorStrategy> strategies;

@@ -23,7 +23,7 @@ public interface WatchlistRepository extends JpaRepository<Watchlist, Long>, Cus
     @Query("UPDATE Watchlist w SET w.position = w.position + 1 WHERE w.userId = :userId AND w.position < :targetPosition")
     int updateUpperPositionByUserId(@Param("userId") String userId, @Param("targetPosition") int targetPosition);
 
-    @Query("SELECT f FROM FinancialDictionary f where f.word like %:word%")
-    List<Watchlist> findSearchFinancialDictionary(@Param("query") String word);
+//    @Query("SELECT f FROM F f where f.word like %:word%")
+//    List<Watchlist> findSearchFinancialDictionary(@Param("query") String word);
 
 }

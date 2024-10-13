@@ -16,8 +16,8 @@ public class WidgetObjCreator {
                 .widgetNo(widget5.getWNo())
                 .template(template)
                 .values(List.of(
-                        WidgetResponse.Widget.Values.builder().text(val1).color("yellow").isBold(true).build(),
-                        WidgetResponse.Widget.Values.builder().text(val2).color("red").isBold(true).build()
+//                        WidgetResponse.Widget.Values.builder().text(val1).color("yellow").isBold(true).build(),
+//                        WidgetResponse.Widget.Values.builder().text(val2).color("red").isBold(true).build()
                 ))
                 .build();
     }
@@ -31,8 +31,8 @@ public class WidgetObjCreator {
                 .widgetNo(widget5.getWNo())
                 .template(template)
                 .values(List.of(
-                        WidgetResponse.Widget.Values.builder().text(val1).color("yellow").isBold(true).build(),
-                        WidgetResponse.Widget.Values.builder().text(val2).color("red").isBold(true).build()
+//                        WidgetResponse.Widget.Values.builder().text(val1).color("yellow").isBold(true).build(),
+//                        WidgetResponse.Widget.Values.builder().text(val2).color("red").isBold(true).build()
                 ))
                 .build();
     }
@@ -44,7 +44,7 @@ public class WidgetObjCreator {
                 .widgetNo(widget5.getWNo())
                 .template(template)
                 .values(List.of(
-                        WidgetResponse.Widget.Values.builder().text(val1).color("yellow").isBold(true).build()
+//                        WidgetResponse.Widget.Values.builder().text(val1).color("yellow").isBold(true).build()
                 ))
                 .build();
     }

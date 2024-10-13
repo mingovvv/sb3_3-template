@@ -36,7 +36,7 @@ public class ConversationService {
         List<Integer> validatedWidgetNo = widgetValidator.validate(inferencePipelineRes);
 
         // 위젯 생성
-        WidgetResponse widgetResponse = widgetGenerator.generateWidget(inferencePipelineRes, validatedWidgetNo);
+        WidgetResponse widgetResponse = widgetGenerator.generateWidget(inferencePipelineRes, validatedWidgetNo, false);
 
         return widgetResponse;
 

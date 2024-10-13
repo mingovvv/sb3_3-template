@@ -28,7 +28,7 @@ public class WidgetGroup1Generator implements WidgetGeneratorStrategy {
 
     @Override
     public WidgetGroup getGroup() {
-        return WidgetGroup.WIDGET_GROUP_1;
+        return null;
     }
 
     @Override

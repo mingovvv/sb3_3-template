@@ -1,7 +1,7 @@
 package demo.template.sb3_3template.repository.mart;
 
 import demo.template.sb3_3template.entity.mart.YhEcoReturnRate;
-import demo.template.sb3_3template.repository.custom.CustomYhEcoReturnRateRepository;
+import demo.template.sb3_3template.repository.custom.yh.CustomYhEcoReturnRateRepository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

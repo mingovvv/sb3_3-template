@@ -33,22 +33,22 @@ public class TokenFilter extends OncePerRequestFilter {
 
         // 토큰 검증 로직
 //        if (token != null && validateToken(token)) {
-        if (true) {
+//        if (true) {
             // 토큰이 유효할 경우 필터 체인을 계속 진행 (세션 생성 가능)
 
-            Authentication authentication = new UsernamePasswordAuthenticationToken(
-                    "name-test", null, Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER")));
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+//            Authentication authentication = new UsernamePasswordAuthenticationToken(
+//                    "name-test", null, Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER")));
+//            SecurityContextHolder.getContext().setAuthentication(authentication);
 
             filterChain.doFilter(request, response);
-        } else {
-            throw new ServletException("Invalid Token");
-        }
+//        } else {
+//            throw new ServletException("Invalid Token");
+//        }
 
     }
 
-    private boolean validateToken(String token) {
-        return true;
-    }
+//    private boolean validateToken(String token) {
+//        return true;
+//    }
 
 }

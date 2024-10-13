@@ -100,7 +100,7 @@ public class WidgetResponse {
                 // todo
             }
 
-        }1
+        }
 
     }
 

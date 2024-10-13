@@ -22,7 +22,7 @@ public class HomeService {
     }
 
     public PaginationRes<FinancialDictionaryDto> getSearchFinancialDictionary(String word) {
-        List<Watchlist> searchFinancialDictionary = watchlistRepository.findSearchFinancialDictionary(word);
+//        List<Watchlist> searchFinancialDictionary = watchlistRepository.findSearchFinancialDictionary(word);
         return null;
     }
 }
