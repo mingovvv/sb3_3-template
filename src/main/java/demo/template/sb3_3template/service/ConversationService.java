@@ -29,6 +29,10 @@ public class ConversationService {
     @Transactional
     public WidgetResponse postConversation(ConversationReq conversationReq) {
 
+        // 대화 저장
+
+        // 대화 상세 저장
+
         // 추론 파이프라인 호출
         InferencePipelineRes inferencePipelineRes = inferencePipelineApi.postInferenceExecution(InferencePipelineReq.of(conversationReq.question()));
 
@@ -37,6 +41,10 @@ public class ConversationService {
 
         // 위젯 생성
         WidgetResponse widgetResponse = widgetGenerator.generateWidget(inferencePipelineRes, validatedWidgetNo, false);
+
+        // 대화 상세 업데이트
+
+        // 개채 저장
 
         return widgetResponse;
 
