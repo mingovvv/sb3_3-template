@@ -1,6 +1,7 @@
 package demo.template.sb3_3template.http.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Builder;
 import lombok.Getter;
 
 import java.util.List;
@@ -16,10 +17,19 @@ public record InferencePipelineRes(
         QuestionMeta questionMeta,
 
         @JsonProperty("widget_group_based_results")
-        String widgetGroupBasedResults
+        WidgetGroupBasedResults widgetGroupBasedResults
 
 ) {
 
+    @Builder
+    public InferencePipelineRes(int widgetGroup, double score, QuestionMeta questionMeta, WidgetGroupBasedResults widgetGroupBasedResults) {
+        this.widgetGroup = widgetGroup;
+        this.score = score;
+        this.questionMeta = questionMeta;
+        this.widgetGroupBasedResults = widgetGroupBasedResults;
+    }
+
+    @Builder
     public record QuestionMeta(
 
             Ner ner,
@@ -30,6 +40,7 @@ public record InferencePipelineRes(
 
     ) {
 
+        @Builder
         public record Ner(
 
             @JsonProperty("tagged_sentence")
@@ -39,6 +50,7 @@ public record InferencePipelineRes(
 
         ) {
 
+            @Builder
             public record Entities(
 
                     String entity,
@@ -47,10 +59,18 @@ public record InferencePipelineRes(
                     int stCode
             ) {
 
+                @Builder
+                public Entities(String entity, String tag, int stCode) {
+                    this.entity = entity;
+                    this.tag = tag;
+                    this.stCode = stCode;
+                }
+
             }
 
         }
 
+        @Builder
         public record Eex(
 
             String event,
@@ -61,6 +81,7 @@ public record InferencePipelineRes(
 
         }
 
+        @Builder
         public record Nsm(
 
             String sector,
@@ -70,6 +91,29 @@ public record InferencePipelineRes(
             @JsonProperty("sentiment_score")
             double sentimentScore
 
+        ) {
+
+        }
+
+    }
+
+    @Builder
+    public record WidgetGroupBasedResults(
+        Widget5 widget5,
+        Widget6 widget6
+
+    ) {
+
+        @Builder
+        public record Widget5(
+                String name
+        ) {
+
+        }
+
+        @Builder
+        public record Widget6(
+                String name
         ) {
 
         }

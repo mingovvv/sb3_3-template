@@ -1,13 +1,16 @@
 package demo.template.common.filter;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import demo.template.common.filter.wrapper.CustomContentCachingRequestWrapper;
 import demo.template.common.filter.wrapper.CustomContentCachingResponseWrapper;
+import demo.template.common.utils.JsonUtil;
 import demo.template.common.utils.MDCUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -98,7 +101,18 @@ public class HttpLoggingFilter extends OncePerRequestFilter {
         MDCUtil.setValue(MDCUtil.REQUEST_BODY, new String(request.getContentAsByteArray(), StandardCharsets.UTF_8));
         MDCUtil.setValue(MDCUtil.REQUEST_URI, request.getRequestURI());
         MDCUtil.setValue(MDCUtil.REQUEST_QUERY_STRING, request.getQueryString());
+//        MDCUtil.setValue(MDCUtil.REQUEST_USER_ID, extractUserIdFromBody(request));
+        ;
     }
+
+//    private String extractUserIdFromBody(HttpServletRequest request) throws IOException {
+//        String requestBody = IOUtils.toString(request.getReader());
+//        // 여기서 requestBody를 파싱하여 userId 추출 (JSON, XML 등)
+//        // 예시: JSON을 파싱하여 userId를 찾는 로직
+//        ObjectMapper objectMapper = new ObjectMapper();
+//        JsonNode jsonNode = objectMapper.readTree(requestBody);
+//        return jsonNode.get("userId").asText();
+//    }
 
     /**
      * logging request
