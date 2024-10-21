@@ -27,7 +27,7 @@ public class JsonUtil {
     }
 
     // Convert an object to JSON string
-    public String toJson(Object object) {
+    public static String toJson(Object object) {
         try {
             return objectMapper.writeValueAsString(object);
         } catch (JsonProcessingException e) {
@@ -36,7 +36,7 @@ public class JsonUtil {
     }
 
     // Convert a JSON string to an object of the specified class
-    public <T> T fromJson(String json, Class<T> clazz) {
+    public static <T> T fromJson(String json, Class<T> clazz) {
         try {
             return objectMapper.readValue(json, clazz);
         } catch (JsonProcessingException e) {

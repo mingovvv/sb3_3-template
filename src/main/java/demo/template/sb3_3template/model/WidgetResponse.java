@@ -97,7 +97,9 @@ public class WidgetResponse {
             }
 
             static public class LineChart {
-                // todo
+                private String x;
+                private String y;
+                private String value;
             }
 
         }

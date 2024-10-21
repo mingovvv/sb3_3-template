@@ -1,9 +1,11 @@
 package demo.template.sb3_3template.controller;
 
+import demo.template.sb3_3template.dto.StockWithMaxThemeDto;
 import demo.template.sb3_3template.entity.Watchlist;
 import demo.template.sb3_3template.entity.mart.YhStockReturnRate;
 import demo.template.sb3_3template.repository.WatchlistRepository;
 import demo.template.sb3_3template.repository.mart.YhMarketRepository;
+import demo.template.sb3_3template.repository.mart.YhStockCodeRepository;
 import demo.template.sb3_3template.repository.mart.YhStockReturnRateRepository;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -25,16 +27,18 @@ public class TestController {
     private final YhMarketRepository yhMarketRepository;
     private final YhStockReturnRateRepository yhStockReturnRateRepository;
     private final WatchlistRepository watchlistRepository;
+    private final YhStockCodeRepository yhStockCodeRepository;
 
-    public TestController(YhMarketRepository yhMarketRepository, YhStockReturnRateRepository yhStockReturnRateRepository, WatchlistRepository watchlistRepository) {
+    public TestController(YhMarketRepository yhMarketRepository, YhStockReturnRateRepository yhStockReturnRateRepository, WatchlistRepository watchlistRepository, YhStockCodeRepository yhStockCodeRepository) {
         this.yhMarketRepository = yhMarketRepository;
         this.yhStockReturnRateRepository = yhStockReturnRateRepository;
         this.watchlistRepository = watchlistRepository;
+        this.yhStockCodeRepository = yhStockCodeRepository;
     }
 
     @GetMapping("/test")
-    public String test(Principal principal) {
-//        log.info("principal: {}", principal.getName());
+    public String test() {
+        List<StockWithMaxThemeDto> stocksWithMaxCapTheme = yhStockCodeRepository.getStocksWithMaxCapTheme();
         return "ok";
     }
 

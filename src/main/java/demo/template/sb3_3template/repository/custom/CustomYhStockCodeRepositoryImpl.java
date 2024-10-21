@@ -2,6 +2,7 @@ package demo.template.sb3_3template.repository.custom;
 
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import demo.template.sb3_3template.dto.*;
 import demo.template.sb3_3template.entity.Watchlist;
@@ -11,6 +12,8 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
+import static demo.template.sb3_3template.entity.mart.QInfostockSectorIndex.infostockSectorIndex;
+import static demo.template.sb3_3template.entity.mart.QThemeStockMaster.themeStockMaster;
 import static demo.template.sb3_3template.entity.mart.QYhMarket.yhMarket;
 import static demo.template.sb3_3template.entity.mart.QYhStockCode.yhStockCode;
 import static demo.template.sb3_3template.entity.mart.QYhStockReturnRate.yhStockReturnRate;
@@ -163,5 +166,25 @@ public class CustomYhStockCodeRepositoryImpl implements CustomYhStockCodeReposit
         return Optional.ofNullable(stockRateOfReturnDto);
 
     }
+
+    @Override
+    public List<StockWithMaxThemeDto> getStocksWithMaxCapTheme() {
+        return queryFactory
+                .select(new QStockWithMaxThemeDto(
+                        yhStockCode.stockCd,
+                        yhStockCode.stockNameKr,
+                        infostockSectorIndex.themeNm.max()
+                ))
+                .from(yhStockCode)
+                .leftJoin(themeStockMaster).on(yhStockCode.stockCd.eq(themeStockMaster.stockCd))
+                .leftJoin(infostockSectorIndex).on(themeStockMaster.themeCd.eq(infostockSectorIndex.themeCd)
+                        .and(infostockSectorIndex.stdDt.eq("20241022")))
+                .groupBy(yhStockCode.stockCd, yhStockCode.stockNameKr)
+                .orderBy(infostockSectorIndex.idxCalMkCap.desc())
+//                .orderBy(Expressions.numberPath(Long.class, "idx_cal_mk_cap").desc())
+                .fetch();
+    }
+
+
 
 }

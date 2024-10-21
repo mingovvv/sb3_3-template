@@ -13,6 +13,11 @@ java {
     }
 }
 
+bootJar {
+    destinationDirectory.set(file("${projectDir}/target"))
+}
+
+
 configurations {
     compileOnly {
         extendsFrom annotationProcessor
@@ -54,6 +59,8 @@ dependencies {
 
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.2'
 
+    testCompileOnly 'org.projectlombok:lombok' // 테스트 의존성 추가
+    testAnnotationProcessor 'org.projectlombok:lombok' // 테스트 의존성 추가
 }
 
 tasks.named('test') {
@@ -62,5 +69,6 @@ tasks.named('test') {
 
 clean {
     delete file('src/main/generated')
+    delete file('target')
 }
 
