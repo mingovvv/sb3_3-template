@@ -1,6 +1,10 @@
 package demo.template.sb3_3template.controller;
 
+import demo.template.common.utils.JsonUtil;
+import demo.template.sb3_3template.dto.NewsDto;
+import demo.template.sb3_3template.dto.NewsProjection;
 import demo.template.sb3_3template.dto.StockWithMaxThemeDto;
+import demo.template.sb3_3template.entity.News;
 import demo.template.sb3_3template.entity.Watchlist;
 import demo.template.sb3_3template.entity.mart.YhStockReturnRate;
 import demo.template.sb3_3template.repository.WatchlistRepository;
@@ -38,8 +42,9 @@ public class TestController {
 
     @GetMapping("/test")
     public String test() {
-        List<StockWithMaxThemeDto> stocksWithMaxCapTheme = yhStockCodeRepository.getStocksWithMaxCapTheme();
-        return "ok";
+//        List<StockWithMaxThemeDto> stocksWithMaxCapTheme = yhStockCodeRepository.getStocksWithMaxCapTheme();
+        List<NewsProjection> news = yhStockCodeRepository.getTopNewsNative();
+        return JsonUtil.toJson(news);
     }
 
     @GetMapping("/valid-session")

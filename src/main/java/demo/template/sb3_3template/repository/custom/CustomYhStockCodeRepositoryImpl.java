@@ -1,10 +1,13 @@
 package demo.template.sb3_3template.repository.custom;
 
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import demo.template.sb3_3template.dto.*;
+import demo.template.sb3_3template.entity.News;
+import demo.template.sb3_3template.entity.QNews;
 import demo.template.sb3_3template.entity.Watchlist;
 import demo.template.sb3_3template.entity.mart.YhStockCode;
 import org.springframework.stereotype.Repository;
@@ -12,6 +15,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
+import static com.querydsl.core.types.dsl.Expressions.stringTemplate;
 import static demo.template.sb3_3template.entity.mart.QInfostockSectorIndex.infostockSectorIndex;
 import static demo.template.sb3_3template.entity.mart.QThemeStockMaster.themeStockMaster;
 import static demo.template.sb3_3template.entity.mart.QYhMarket.yhMarket;
@@ -185,6 +189,40 @@ public class CustomYhStockCodeRepositoryImpl implements CustomYhStockCodeReposit
                 .fetch();
     }
 
+    @Override
+    public List<NewsDto> getTopNews() {
+        QNews news = QNews.news;
+
+        // 서브쿼리: 각 월별로 stmt_score가 가장 큰 값을 찾는 부분
+        QNews newsSub = new QNews("newsSub");
+
+        List<NewsDto> result = queryFactory
+                .select(Projections.constructor(NewsDto.class,
+                        news.newsId,
+                        news.vendor,
+                        news.newsDt,
+                        news.title,
+                        news.text,
+                        news.url,
+                        news.docId,
+                        news.sectorNm,
+                        news.stmtScore))
+                .from(news)
+                .where(
+                        // news_dt의 앞 6자리를 추출하여 월별로 stmt_score가 가장 큰 행을 찾는 조건
+                        JPAExpressions.select(newsSub.stmtScore.max())
+                                .from(newsSub)
+                                .where(stringTemplate("substring({0}, 1, 6)", news.newsDt)
+                                        .eq(stringTemplate("substring({0}, 1, 6)", newsSub.newsDt)))
+                                .groupBy(stringTemplate("substring({0}, 1, 6)", newsSub.newsDt))
+                                .having(news.stmtScore.eq(newsSub.stmtScore.max()))
+                                .exists()
+                )
+                .orderBy(news.newsDt.asc())
+                .fetch();
+
+        return result;
+    }
 
 
 }
