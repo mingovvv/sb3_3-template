@@ -1,0 +1,57 @@
+CREATE PROCEDURE InsertStockReturnRate(
+    IN startDt VARCHAR(6),
+    IN endDt VARCHAR(6),
+    IN isinVal VARCHAR(255),
+    IN stockCdVal VARCHAR(255)
+)
+BEGIN
+    DECLARE currentDate VARCHAR(6);
+    SET currentDate = startDt;
+
+    WHILE currentDate <= endDt DO
+            INSERT INTO cde_yh_stock_m_return_rate (isin, stock_cd, stock_dt, return_rate_m)
+            VALUES (
+                       isinVal,
+                       stockCdVal,
+                       currentDate,
+                       ROUND(-100.0 + (RAND() * 200.0), 2)  -- -100.0 ~ 100.0 사이의 랜덤값 (소수점 2자리)
+                   );
+
+            SET currentDate = DATE_FORMAT(ADDDATE(STR_TO_DATE(CONCAT(currentDate, '01'), '%Y%m%d'), INTERVAL 1 MONTH), '%Y%m');
+        END WHILE;
+END //
+
+DELIMITER ;
+
+CALL InsertStockReturnRate('202201', '202409', '13', 'TE003');
+
+DELIMITER //
+
+CREATE PROCEDURE InsertMarketData(
+    IN startDt VARCHAR(8),
+    IN endDt VARCHAR(8),
+    IN isinVal VARCHAR(255),
+    IN stockCdVal VARCHAR(255)
+)
+BEGIN
+    DECLARE currentDate DATE;
+    SET currentDate = STR_TO_DATE(startDt, '%Y%m%d');
+
+    WHILE currentDate <= STR_TO_DATE(endDt, '%Y%m%d') DO
+            INSERT INTO cde_yh_market (
+                adjust_price, base, close, cum_vol, divd_tot_amnt, divd_yield, high,
+                idx_cal_mk_cap, idx_cal_shr, isin, listed_cnt, low, mk_cap, open,
+                std_dt, stock_cd
+            ) VALUES (
+                         '', '',
+                         ROUND(1000 + (RAND() * 39000), 2),  -- close 값: 1000 ~ 40000 사이 랜덤
+                         '', '', '', '',
+                         ROUND(1000000 + (RAND() * 2000000), 2),  -- idx_cal_mk_cap 값: 1000000 ~ 3000000 사이 랜덤
+                         '', isinVal, '', '', '', '',
+                         DATE_FORMAT(currentDate, '%Y%m%d'),  -- std_dt: yyyyMMdd 형태
+                         stockCdVal
+                     );
+
+            SET currentDate = DATE_ADD(currentDate, INTERVAL 1 DAY);
+        END WHILE;
+END //

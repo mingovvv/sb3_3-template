@@ -39,12 +39,14 @@ public class WidgetGroup13Generator extends AbstractWidgetGenerator {
 
     private WidgetResponse.Widget generateWidget27(WidgetCreationDto dto) {
 
-        WidgetCreationDto.Entity stockEntity = dto.entityMap().get(Tag.STOCK.getTagName()).get(0);
-        WidgetCreationDto.Entity financeEntity = dto.entityMap().get(Tag.FINANCE.getTagName()).get(0);
+//        WidgetCreationDto.Entity stockEntity = dto.entityMap().get(Tag.STOCK.getTagName()).get(0);
+//        WidgetCreationDto.Entity financeEntity = dto.entityMap().get(Tag.FINANCE.getTagName()).get(0);
+
+        WidgetCreationDto.Entity stockEntity = WidgetCreationDto.Entity.builder().tag(Tag.STOCK.name()).entity("삼전").stCode(1).build();
+        WidgetCreationDto.Entity financeEntity = WidgetCreationDto.Entity.builder().tag(Tag.FINANCE.name()).entity("수익률").stCode(2).build();
 
         // 최근 6년치 데이터 조회
         List<Fs> fs = fsRepository.findAll();
-
 
         return WidgetTemplateCreator.createWidget27Detail(stockEntity, financeEntity, fs);
     }

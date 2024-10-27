@@ -33,11 +33,14 @@ public class WidgetGenerator {
 //        WidgetGroup group = WidgetGroup.findWidgetGroup(inferencePipelineRes.widgetGroup());
 
         WidgetCreationDto.Entity source = WidgetCreationDto.Entity.builder().tag(Tag.STOCK.name()).entity("삼전").stCode(1).build();
-        WidgetCreationDto.Entity target = WidgetCreationDto.Entity.builder().tag(Tag.STOCK.name()).entity("두산").stCode(2).build();
+        WidgetCreationDto.Entity target = WidgetCreationDto.Entity.builder().tag(Tag.FINANCE.name()).entity("수익률").stCode(2).build();
 
-        WidgetCreationDto dto = new WidgetCreationDto(3, List.of(source, target), null, null, null, null);
+        List<WidgetCreationDto.Entity> list = List.of(source, target);
 
-        WidgetResponse res = strategies.get(WidgetGroup.WIDGET_GROUP_3).generate(dto, List.of(11), includeCommonWidget);
+        WidgetCreationDto dto = new WidgetCreationDto(3, List.of(source, target), Map
+                .of(), null, null, null);
+
+        WidgetResponse res = strategies.get(WidgetGroup.WIDGET_GROUP_13).generate(dto, List.of(27), includeCommonWidget);
 
         // 공통 위젯 포함 여부 확인 후 동적으로 포함
 //        if (includeCommonWidget && commonWidgetStrategy.shouldInclude(inferencePipelineRes)) {
