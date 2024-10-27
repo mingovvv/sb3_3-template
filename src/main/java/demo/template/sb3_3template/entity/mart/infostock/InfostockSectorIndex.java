@@ -1,4 +1,4 @@
-package demo.template.sb3_3template.entity.mart;
+package demo.template.sb3_3template.entity.mart.infostock;
 
 import demo.template.sb3_3template.entity.common.MartBaseEntity;
 import jakarta.persistence.*;

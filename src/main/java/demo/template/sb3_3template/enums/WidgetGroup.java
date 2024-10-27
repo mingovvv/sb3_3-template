@@ -10,7 +10,11 @@ import static demo.template.sb3_3template.enums.WidgetGroup.Widget.*;
 public enum WidgetGroup {
 
     WIDGET_GROUP_1(1, true, WIDGET_5, WIDGET_6, WIDGET_7, WIDGET_8),
-    WIDGET_GROUP_2(2, true, WIDGET_5, WIDGET_6, WIDGET_7, WIDGET_8);
+    WIDGET_GROUP_2(2, true, WIDGET_5, WIDGET_6, WIDGET_7, WIDGET_8),
+    WIDGET_GROUP_3(3, true, WIDGET_11),
+    WIDGET_GROUP_6(6, true, WIDGET_11),
+    WIDGET_GROUP_13(13, true, WIDGET_29),
+    WIDGET_GROUP_15(15, true, WIDGET_29);
 
     private int wedgetGroupNo;
     private boolean isUsedCommonWidget;
@@ -53,7 +57,20 @@ public enum WidgetGroup {
                 반면, {} {}, {} {} 스타일은 부정적으로 작용하고 있어요.
                 """),
         WIDGET_8(8, """
-                """);
+                """),
+        WIDGET_11(11, """
+                {}와 {}의 움직임을 최근 2년간 분석했다. 상승일치 비율은 {}%이다. {}가 {}번 올랐을 때, {}는 {}번 올랐다. 하락일치 비율은 {}%이다. {}가 {}번 내렸을때, {}은 {}번 내렸다. 
+                """),
+        WIDGET_18(18, """
+                {}이 {}때 아래의 종목들이 같이 {} 하는 경향이 있었어요.
+                |
+                {}이 {}때 아래의 종목들이 같이 {} 하는 경향이 있었어요.
+                """),
+        WIDGET_27(27, """
+                {} {} 의 {} 는 {} 입니다.
+                최근 5년간 추세와 함께 살펴보세요.
+                """),
+        WIDGET_29(29, "");
 
         private int wNo;
         private String[] template;

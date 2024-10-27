@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import java.io.Serializable;
 
 @Getter
+@IdClass(YhMarket.CompositeKey.class)
 @Entity
 @Table(name = "yh_market")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -20,6 +21,13 @@ public class YhMarket {
             @JoinColumn(name = "stock_cd", referencedColumnName = "stock_cd")
     })
     private YhStockCode yhStockCode;
+
+    @Id
+    private String isin;
+
+    @Id
+    @Column(name = "stock_cd")
+    private String stockCd;
 
     @Id
     @Column(name = "std_dt")
@@ -58,5 +66,13 @@ public class YhMarket {
 
     @Column(name = "divd_yield")
     private String divdYield;
+
+    @NoArgsConstructor
+    @EqualsAndHashCode
+    static public class CompositeKey implements Serializable {
+        private String isin;
+        private String stockCd;
+        private String stdDt;
+    }
 
 }

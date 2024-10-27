@@ -34,13 +34,13 @@ public class ConversationService {
         // 대화 상세 저장
 
         // 추론 파이프라인 호출
-        InferencePipelineRes inferencePipelineRes = inferencePipelineApi.postInferenceExecution(InferencePipelineReq.of(conversationReq.question()));
+//        InferencePipelineRes inferencePipelineRes = inferencePipelineApi.postInferenceExecution(InferencePipelineReq.of(conversationReq.question()));
 
         // 위젯그룹 검증
-        List<Integer> validatedWidgetNo = widgetValidator.validate(inferencePipelineRes);
+//        List<Integer> validatedWidgetNo = widgetValidator.validate(inferencePipelineRes);
 
         // 위젯 생성
-        WidgetResponse widgetResponse = widgetGenerator.generateWidget(inferencePipelineRes, validatedWidgetNo, false);
+        WidgetResponse widgetResponse = widgetGenerator.generateWidget(null, null, false);
 
         // 대화 상세 업데이트
 

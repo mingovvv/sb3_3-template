@@ -1,0 +1,29 @@
+{
+  "status": true,
+  "code": "S200",
+  "message": "Success.",
+  "data": {
+    "conversationId": 0,
+    "widgetGroupNo": 1,
+    "widgets": [
+      {
+        "widgetHistId" : 1,
+        "isLiked": true,
+        "isEvaluated": true,
+        "widgetNo": 1,
+        "subject": "",
+        "template": null,
+        "values": null,
+        "supplement": {
+          "type": "lineChart",
+          "lineChart": {
+            "title": "",
+            "xaxis": [],
+            "yaxis": [],
+            "addtionalValue": []
+          }
+        }
+      }
+    ]
+  }
+}

@@ -6,21 +6,27 @@ import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import demo.template.sb3_3template.dto.*;
-import demo.template.sb3_3template.entity.News;
+import demo.template.sb3_3template.dto.projection.QStockReturnMkCap;
+import demo.template.sb3_3template.dto.projection.StockReturnMkCap;
 import demo.template.sb3_3template.entity.QNews;
 import demo.template.sb3_3template.entity.Watchlist;
 import demo.template.sb3_3template.entity.mart.YhStockCode;
+import demo.template.sb3_3template.entity.mart.YhStockReturnRate;
+import demo.template.sb3_3template.enums.BsnsDays;
+import demo.template.sb3_3template.enums.RankType;
 import org.springframework.stereotype.Repository;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static com.querydsl.core.types.dsl.Expressions.stringTemplate;
-import static demo.template.sb3_3template.entity.mart.QInfostockSectorIndex.infostockSectorIndex;
 import static demo.template.sb3_3template.entity.mart.QThemeStockMaster.themeStockMaster;
 import static demo.template.sb3_3template.entity.mart.QYhMarket.yhMarket;
 import static demo.template.sb3_3template.entity.mart.QYhStockCode.yhStockCode;
 import static demo.template.sb3_3template.entity.mart.QYhStockReturnRate.yhStockReturnRate;
+import static demo.template.sb3_3template.entity.mart.infostock.QInfostockSectorIndex.infostockSectorIndex;
 import static demo.template.sb3_3template.entity.raw.QInfostockTheme.infostockTheme;
 import static demo.template.sb3_3template.entity.raw.QInfostockThemeStock.infostockThemeStock;
 
@@ -222,6 +228,57 @@ public class CustomYhStockCodeRepositoryImpl implements CustomYhStockCodeReposit
                 .fetch();
 
         return result;
+    }
+
+    @Override
+    public Map<RankType, List<StockReturnMkCap>> findByStdDtAndBsnsDays(String stdDt, BsnsDays bsnsDays) {
+
+        Map<RankType, List<StockReturnMkCap>> stockReturnMap = new HashMap<>();
+
+        List<StockReturnMkCap> top5 = queryFactory
+                .select(new QStockReturnMkCap(
+                        yhStockReturnRate.stockCd,
+                        yhStockCode.stockNameKr,
+                        yhStockReturnRate.stdDt,
+                        yhStockReturnRate.returnRate,
+                        yhMarket.idxCalMkCap
+                ))
+                .from(yhStockReturnRate)
+                .leftJoin(yhStockReturnRate.yhStockCode, yhStockCode)
+                .leftJoin(yhMarket)
+                    .on(yhStockReturnRate.yhStockCode.isin.eq(yhMarket.yhStockCode.isin)
+                            .and(yhStockReturnRate.yhStockCode.stockCd.eq(yhMarket.yhStockCode.stockCd))
+                            .and(yhStockReturnRate.stdDt.eq(yhMarket.stdDt)))
+                .where(yhStockReturnRate.stdDt.eq(stdDt)
+                        .and(yhStockReturnRate.bsnsDays.eq(bsnsDays.getBsnsDays())))
+                .orderBy(yhStockReturnRate.returnRate.desc())
+                .limit(5)
+                .fetch();
+
+        List<StockReturnMkCap> bottom5 = queryFactory
+                .select(new QStockReturnMkCap(
+                        yhStockReturnRate.stockCd,
+                        yhStockCode.stockNameKr,
+                        yhStockReturnRate.stdDt,
+                        yhStockReturnRate.returnRate,
+                        yhMarket.idxCalMkCap
+                ))
+                .from(yhStockReturnRate)
+                .leftJoin(yhStockReturnRate.yhStockCode, yhStockCode)
+                .leftJoin(yhMarket)
+                .on(yhStockReturnRate.yhStockCode.isin.eq(yhMarket.yhStockCode.isin)
+                        .and(yhStockReturnRate.yhStockCode.stockCd.eq(yhMarket.yhStockCode.stockCd))
+                        .and(yhStockReturnRate.stdDt.eq(yhMarket.stdDt)))
+                .where(yhStockReturnRate.stdDt.eq(stdDt)
+                        .and(yhStockReturnRate.bsnsDays.eq(bsnsDays.getBsnsDays())))
+                .orderBy(yhStockReturnRate.returnRate.asc())
+                .limit(5)
+                .fetch();
+
+        stockReturnMap.put(RankType.TOP, top5);
+        stockReturnMap.put(RankType.BOTTOM, bottom5);
+
+        return stockReturnMap;
     }
 
 

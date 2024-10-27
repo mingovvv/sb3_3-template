@@ -1,5 +1,6 @@
 package demo.template.sb3_3template.service.widget;
 
+import demo.template.sb3_3template.dto.WidgetCreationDto;
 import demo.template.sb3_3template.enums.WidgetGroup;
 import demo.template.sb3_3template.model.WidgetResponse;
 
@@ -15,7 +16,7 @@ public abstract class AbstractWidgetGenerator implements WidgetGeneratorStrategy
     @Override
     public WidgetResponse generate(Object object1, List<Integer> list, boolean includeCommonWidget) {
 
-        WidgetResponse response = new WidgetResponse(1, null, new ArrayList<>());
+        WidgetResponse response = new WidgetResponse(1L, 15, new ArrayList<>());
 
         // 공통 위젯 조건이 만족되면 포함
         if (includeCommonWidget) {
@@ -24,7 +25,7 @@ public abstract class AbstractWidgetGenerator implements WidgetGeneratorStrategy
 
         // 그룹에 속한 위젯들 생성
         list.forEach(widgetNo -> {
-            response.getWidgets().add(generateSpecificWidget(widgetNo));
+            response.getWidgets().add(generateSpecificWidget((WidgetCreationDto) object1, widgetNo));
         });
 
         return response;
@@ -37,6 +38,6 @@ public abstract class AbstractWidgetGenerator implements WidgetGeneratorStrategy
     }
 
     // 구체적인 위젯 생성 로직을 각 하위 클래스에서 구현
-    protected abstract WidgetResponse.Widget generateSpecificWidget(int widgetNo);
+    protected abstract WidgetResponse.Widget generateSpecificWidget(WidgetCreationDto object1, int widgetNo);
 
 }

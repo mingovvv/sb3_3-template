@@ -8,10 +8,8 @@ import demo.template.sb3_3template.entity.Watchlist;
 
 import java.util.List;
 
-import static demo.template.sb3_3template.entity.mart.QInfostockSectorIndex.infostockSectorIndex;
 import static demo.template.sb3_3template.entity.mart.QYhEcoClose.yhEcoClose;
 import static demo.template.sb3_3template.entity.mart.QYhEcoCode.yhEcoCode;
-import static demo.template.sb3_3template.entity.mart.QYhMarket.yhMarket;
 
 public class CustomYhEcoCodeRepositoryImpl implements CustomYhEcoCodeRepository {
 

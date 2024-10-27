@@ -65,10 +65,10 @@ public class TestController {
 
         try {
 
-            Optional<YhStockReturnRate> test = yhStockReturnRateRepository.findTest("SS001", "isin001", "20241013", 20);
+//            Optional<YhStockReturnRate> test = yhStockReturnRateRepository.findTest("SS001", "isin001", "20241013", 20);
 
 
-            Optional<YhStockReturnRate> test2 = yhStockReturnRateRepository.findTest("LG001", "isin002", "20241013", 20);
+//            Optional<YhStockReturnRate> test2 = yhStockReturnRateRepository.findTest("LG001", "isin002", "20241013", 20);
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -13,7 +13,7 @@ public enum Tag {
     STOCK("OG_COMPANY"),
     INDEX("MK_INDEX"),
     SECTOR("MK_SECTOR"),
-    FINANCE("FINANCE"),
+    FINANCE("MK_FINANCE"),
     원자재("원자재"),
     채권("채권"),
     외환("외환"),

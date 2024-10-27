@@ -6,6 +6,7 @@ import lombok.*;
 
 import java.io.Serializable;
 
+@ToString
 @IdClass(YhEcoReturnRate.CompositeKey.class)
 @Getter
 @Entity
@@ -16,6 +17,10 @@ public class YhEcoReturnRate extends MartBaseEntity {
     @ManyToOne
     @JoinColumn(name = "eco_cd", referencedColumnName = "eco_cd")
     private YhEcoCode yhEcoCode;
+
+    @Id
+    @Column(name = "eco_cd")
+    private String ecoCode;
 
     @Id
     @Column(name = "bsns_days", columnDefinition = "TINYINT")
@@ -34,7 +39,8 @@ public class YhEcoReturnRate extends MartBaseEntity {
     @NoArgsConstructor
     @EqualsAndHashCode
     static public class CompositeKey implements Serializable {
-        private String bsnsDays;
+        private String ecoCode;
+        private Integer bsnsDays;
         private String stdDt;
     }
 

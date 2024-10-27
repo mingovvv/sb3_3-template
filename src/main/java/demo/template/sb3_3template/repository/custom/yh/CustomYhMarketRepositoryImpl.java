@@ -1,6 +1,9 @@
 package demo.template.sb3_3template.repository.custom.yh;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import demo.template.sb3_3template.entity.mart.YhMarket;
+
+import java.util.List;
 
 import static demo.template.sb3_3template.entity.mart.QYhMarket.yhMarket;
 import static demo.template.sb3_3template.entity.mart.QYhStockCode.yhStockCode;
@@ -25,5 +28,16 @@ public class CustomYhMarketRepositoryImpl implements CustomYhMarketRepository{
 //                .
         return;
     }
+
+    @Override
+    public List<YhMarket> findByStockNmAndStdDtGoe(String stockNm, String stdDt) {
+        return queryFactory
+                .select(yhMarket)
+                .from(yhMarket)
+                .leftJoin(yhMarket.yhStockCode, yhStockCode).fetchJoin()
+                .where(yhMarket.yhStockCode.stockNameKr.eq(stockNm)
+                        .and(yhMarket.stdDt.goe(stdDt)))
+                .fetch();
+        }
 
 }

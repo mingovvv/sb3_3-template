@@ -1,5 +1,7 @@
 package demo.template.sb3_3template.service.widget;
 
+import demo.template.sb3_3template.dto.WidgetCreationDto;
+import demo.template.sb3_3template.enums.Tag;
 import demo.template.sb3_3template.enums.WidgetGroup;
 import demo.template.sb3_3template.http.dto.InferencePipelineRes;
 import demo.template.sb3_3template.model.WidgetResponse;
@@ -28,9 +30,14 @@ public class WidgetGenerator {
      */
     public WidgetResponse generateWidget(InferencePipelineRes inferencePipelineRes, List<Integer> allowedWidgetNoList, boolean includeCommonWidget) {
 
-        WidgetGroup group = WidgetGroup.findWidgetGroup(inferencePipelineRes.widgetGroup());
+//        WidgetGroup group = WidgetGroup.findWidgetGroup(inferencePipelineRes.widgetGroup());
 
-        WidgetResponse res = strategies.get(group).generate(inferencePipelineRes, allowedWidgetNoList, includeCommonWidget);
+        WidgetCreationDto.Entity source = WidgetCreationDto.Entity.builder().tag(Tag.STOCK.name()).entity("삼전").stCode(1).build();
+        WidgetCreationDto.Entity target = WidgetCreationDto.Entity.builder().tag(Tag.STOCK.name()).entity("두산").stCode(2).build();
+
+        WidgetCreationDto dto = new WidgetCreationDto(3, List.of(source, target), null, null, null, null);
+
+        WidgetResponse res = strategies.get(WidgetGroup.WIDGET_GROUP_3).generate(dto, List.of(11), includeCommonWidget);
 
         // 공통 위젯 포함 여부 확인 후 동적으로 포함
 //        if (includeCommonWidget && commonWidgetStrategy.shouldInclude(inferencePipelineRes)) {

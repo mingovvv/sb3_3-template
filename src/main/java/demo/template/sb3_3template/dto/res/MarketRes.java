@@ -1,7 +1,7 @@
 package demo.template.sb3_3template.dto.res;
 
 import demo.template.sb3_3template.dto.StockCompositeDto;
-import demo.template.sb3_3template.entity.mart.InfostockSectorIndex;
+import demo.template.sb3_3template.entity.mart.infostock.InfostockSectorIndex;
 import demo.template.sb3_3template.entity.mart.YhEcoCode;
 import demo.template.sb3_3template.entity.raw.InfostockTheme;
 import demo.template.sb3_3template.enums.IndexKrType;

@@ -21,6 +21,10 @@ public class YhEcoClose extends MartBaseEntity {
     private YhEcoCode yhEcoCode;
 
     @Id
+    @Column(name = "eco_cd")
+    private String ecoCode;
+
+    @Id
     private String stdDt;
 
     @Id
@@ -30,7 +34,8 @@ public class YhEcoClose extends MartBaseEntity {
 
     @NoArgsConstructor
     @EqualsAndHashCode
-    static protected class CompositeKey implements Serializable {
+    static public class CompositeKey implements Serializable {
+        private String ecoCode;
         private String stdDt;
         private String dayType;
     }

@@ -27,4 +27,7 @@ public class YhEcoCode extends MartBaseEntity {
     @Column(name = "eco_nm_en")
     private String ecoNameEn;
 
+    @Column(name = "country_kr")
+    private String countryKr;
+
 }

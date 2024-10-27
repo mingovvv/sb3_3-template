@@ -17,7 +17,7 @@ class WG1Test {
     void w6() {
 
         // example
-        WidgetCreationDto dto = new WidgetCreationDto(1, List.of(), null, List.of(
+        WidgetCreationDto dto = new WidgetCreationDto(1, List.of(), null, null, List.of(
                 new WidgetCreationDto.Widget6("이벤트1", "20241001"),
                 new WidgetCreationDto.Widget6("이벤트2", "20241001"),
                 new WidgetCreationDto.Widget6("이벤트3", "20241001"),

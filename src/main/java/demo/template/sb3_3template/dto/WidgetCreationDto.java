@@ -2,9 +2,11 @@ package demo.template.sb3_3template.dto;
 
 import demo.template.sb3_3template.http.dto.InferencePipelineRes;
 import lombok.Builder;
+import lombok.Getter;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Builder
@@ -14,6 +16,8 @@ public record WidgetCreationDto(
 
         List<Entity> entity,
 
+        Map<String, List<Entity>> entityMap,
+
         Widget5 widget5,
 
         List<Widget6> widget6,
@@ -21,6 +25,16 @@ public record WidgetCreationDto(
         List<News> news
 
 ) {
+
+    @Builder
+    public WidgetCreationDto(int widgetGroup, List<Entity> entity, Map<String, List<Entity>> entityMap, Widget5 widget5, List<Widget6> widget6, List<News> news) {
+        this.widgetGroup = widgetGroup;
+        this.entity = entity;
+        this.entityMap = entityMap;
+        this.widget5 = widget5;
+        this.widget6 = widget6;
+        this.news = news;
+    }
 
     @Builder
     public record Entity(
