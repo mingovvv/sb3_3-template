@@ -3,7 +3,7 @@ FROM docker.io/library/openjdk:17-jdk-alpine as builder
 
 WORKDIR /app
 
-COPY build.gradle .
+COPY build.gradleX .
 COPY settings.gradle .
 COPY gradle gradle
 COPY gradlew .

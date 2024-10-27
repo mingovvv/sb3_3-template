@@ -49,7 +49,7 @@ public class WidgetGroup6Generator extends AbstractWidgetGenerator {
 
     @Override
     public WidgetGroup getGroup() {
-        return WidgetGroup.WIDGET_GROUP_3;
+        return WidgetGroup.WIDGET_GROUP_6;
     }
 
     @Override
