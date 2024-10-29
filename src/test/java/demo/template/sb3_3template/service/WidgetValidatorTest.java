@@ -51,6 +51,7 @@ class WidgetValidatorTest {
             case 3 -> {
                 ArrayList<Integer> defaultWidgetNo = new ArrayList<>();
                 Set<String> listup = Set.of(Tag.STOCK.getTagName(), Tag.SECTOR.getTagName(), Tag.INDEX.getTagName(), Tag.원자재.getTagName(), Tag.채권.getTagName(), Tag.외환.getTagName(), Tag.경제.getTagName(), Tag.기준금리.getTagName());
+                if (tagList.stream().filter(listup::contains).count() == 2)
                 if (listup.containsAll(tagList)) defaultWidgetNo.add(10);
                 yield defaultWidgetNo;
             }

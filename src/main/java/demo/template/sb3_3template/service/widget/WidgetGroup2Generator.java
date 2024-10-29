@@ -1,5 +1,6 @@
 package demo.template.sb3_3template.service.widget;
 
+import demo.template.sb3_3template.dto.WidgetCreationDto;
 import demo.template.sb3_3template.enums.WidgetGroup;
 import demo.template.sb3_3template.model.WidgetResponse;
 import org.springframework.stereotype.Service;
@@ -17,7 +18,7 @@ public class WidgetGroup2Generator implements WidgetGeneratorStrategy {
     }
 
     @Override
-    public WidgetResponse generate(Object object1, List<Integer> list, boolean includeCommonWidget) {
+    public WidgetResponse generate(WidgetCreationDto dto, List<Integer> list, boolean includeCommonWidget) {
 
         // widgetGroup 2 생성
         return null;

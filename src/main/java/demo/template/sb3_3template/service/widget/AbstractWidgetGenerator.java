@@ -14,9 +14,9 @@ public abstract class AbstractWidgetGenerator implements WidgetGeneratorStrategy
 
 
     @Override
-    public WidgetResponse generate(Object object1, List<Integer> list, boolean includeCommonWidget) {
+    public WidgetResponse generate(WidgetCreationDto dto, List<Integer> list, boolean includeCommonWidget) {
 
-        WidgetResponse response = new WidgetResponse(1L, 15, new ArrayList<>());
+        WidgetResponse response = new WidgetResponse(1L, dto.widgetGroup(), new ArrayList<>());
 
         // 공통 위젯 조건이 만족되면 포함
         if (includeCommonWidget) {
@@ -25,7 +25,7 @@ public abstract class AbstractWidgetGenerator implements WidgetGeneratorStrategy
 
         // 그룹에 속한 위젯들 생성
         list.forEach(widgetNo -> {
-            response.getWidgets().add(generateSpecificWidget((WidgetCreationDto) object1, widgetNo));
+            response.getWidgets().add(generateSpecificWidget(dto, widgetNo));
         });
 
         return response;

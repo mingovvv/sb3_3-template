@@ -1,7 +1,12 @@
 package demo.template.sb3_3template.service.widget;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.ToString;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -13,16 +18,37 @@ public class WG2Test {
     void w9And10() {
 
         // example
-        List<WG2Test.Fs> fsList = List.of(
-                new WG2Test.Fs("001", "2022", "1", "900"),
-                new WG2Test.Fs("001", "2022", "2", "1000"),
-                new WG2Test.Fs("001", "2022", "3", "-200"),
-                new WG2Test.Fs("001", "2022", "4", "-100"),
-                new WG2Test.Fs("001", "2023", "1", "1000"),  // 양수 -> 양수
-                new WG2Test.Fs("001", "2023", "2", "-500"),  // 양수 -> 음수
-                new WG2Test.Fs("001", "2023", "3", "700"),  // 음수 -> 양수
-                new WG2Test.Fs("001", "2023", "4", "-300")  // 음수 -> 음수
-        );
+        List<WG2Test.Fs> fsList = new ArrayList<>();
+
+        fsList.add(new Fs("001", "2019", "1", BigDecimal.valueOf(900.000)));
+        fsList.add(new Fs("001", "2019", "2", BigDecimal.valueOf(1500.000)));
+        fsList.add(new Fs("001", "2019", "3", BigDecimal.valueOf(3500.000)));
+        fsList.add(new Fs("001", "2019", "4", BigDecimal.valueOf(-1500.000)));
+
+        fsList.add(new Fs("001", "2020", "1", BigDecimal.valueOf(1200.000)));
+        fsList.add(new Fs("001", "2020", "2", BigDecimal.valueOf(1800.000)));
+        fsList.add(new Fs("001", "2020", "3", BigDecimal.valueOf(3000.000)));
+        fsList.add(new Fs("001", "2020", "4", BigDecimal.valueOf(-1000.000)));
+
+        fsList.add(new Fs("001", "2021", "1", BigDecimal.valueOf(1100.000)));
+        fsList.add(new Fs("001", "2021", "2", BigDecimal.valueOf(1700.000)));
+        fsList.add(new Fs("001", "2021", "3", BigDecimal.valueOf(2500.000)));
+        fsList.add(new Fs("001", "2021", "4", BigDecimal.valueOf(-800.000)));
+
+        fsList.add(new Fs("001", "2022", "1", BigDecimal.valueOf(1000.000)));
+        fsList.add(new Fs("001", "2022", "2", BigDecimal.valueOf(1600.000)));
+        fsList.add(new Fs("001", "2022", "3", BigDecimal.valueOf(2000.000)));
+        fsList.add(new Fs("001", "2022", "4", BigDecimal.valueOf(-1200.000)));
+
+        fsList.add(new Fs("001", "2023", "1", BigDecimal.valueOf(1300.000)));
+        fsList.add(new Fs("001", "2023", "2", BigDecimal.valueOf(1400.000)));
+        fsList.add(new Fs("001", "2023", "3", BigDecimal.valueOf(2200.000)));
+        fsList.add(new Fs("001", "2023", "4", BigDecimal.valueOf(-1100.000)));
+
+        fsList.add(new Fs("001", "2024", "1", BigDecimal.valueOf(1250.000)));
+        fsList.add(new Fs("001", "2024", "2", BigDecimal.valueOf(1750.000)));
+        fsList.add(new Fs("001", "2024", "3", BigDecimal.valueOf(2750.000)));
+        fsList.add(new Fs("001", "2024", "4", BigDecimal.valueOf(-900.000)));
 
         List<W11Dto> list = fsList.stream()
                 .map(s -> new W11Dto(s.stockCd, s.fsDt, s.quarter, s.data))
@@ -44,6 +70,7 @@ public class WG2Test {
             System.out.println(result);
         }
 
+        System.out.println("=================");
 
         // 전년동분기대비 증감율
         List<WG2Test.DiffResult> changeRates = calculateYearOverYearChangeRate(list);
@@ -71,17 +98,11 @@ public class WG2Test {
 
             if (fsByQuarter.containsKey(previousYearKey)) {
                 WG2Test.W11Dto previousFs = fsByQuarter.get(previousYearKey);
-                try {
-                    double currentData = Double.parseDouble(w.data);
-                    double previousData = Double.parseDouble(previousFs.data);
-                    double diffValue = currentData - previousData;
+                BigDecimal subtract = w.data.subtract(previousFs.data);
 
-                    // 차분값을 String으로 변환하여 DTO에 저장
-                    String diff = String.valueOf(diffValue);
-                    diffResults.add(new WG2Test.DiffResult(w.stockCd, w.fsDt, w.quarter, diff));
-                } catch (NumberFormatException e) {
-                    System.out.println("데이터 변환 오류: " + e.getMessage());
-                }
+                // 차분값을 String으로 변환하여 DTO에 저장
+                String diff = String.valueOf(subtract);
+                diffResults.add(new WG2Test.DiffResult(w.stockCd, w.fsDt, w.quarter, diff));
             }
         }
 
@@ -107,21 +128,19 @@ public class WG2Test {
             if (fsByQuarter.containsKey(previousYearKey)) {
                 W11Dto previousFs = fsByQuarter.get(previousYearKey);
                 try {
-                    double currentData = Double.parseDouble(currentFs.data);
-                    double previousData = Double.parseDouble(previousFs.data);
                     String changeRate;
 
-                    if (previousData > 0 && currentData > 0) {
+                    if (previousFs.data.compareTo(BigDecimal.ZERO) > 0 && currentFs.data.compareTo(BigDecimal.ZERO) > 0) {
                         // 양수 -> 양수 : 증감율 계산
-                        double rate = ((currentData - previousData) / previousData) * 100;
-                        changeRate = String.format("%.2f%%", rate);
-                    } else if (previousData < 0 && currentData > 0) {
+                        BigDecimal rate = currentFs.data.subtract(previousFs.data).divide(previousFs.data, 4, RoundingMode.HALF_UP).multiply(BigDecimal.valueOf(100));
+                        changeRate = String.format("%.2f", rate);
+                    } else if (previousFs.data.compareTo(BigDecimal.ZERO) < 0 && currentFs.data.compareTo(BigDecimal.ZERO) > 0) {
                         // 음수 -> 양수 : 흑자전환
                         changeRate = "흑자전환";
-                    } else if (previousData > 0 && currentData < 0) {
+                    } else if (previousFs.data.compareTo(BigDecimal.ZERO) > 0 && currentFs.data.compareTo(BigDecimal.ZERO) < 0) {
                         // 양수 -> 음수 : 적자전환
                         changeRate = "적자전환";
-                    } else if (previousData < 0 && currentData < 0) {
+                    } else if (previousFs.data.compareTo(BigDecimal.ZERO) < 0 && currentFs.data.compareTo(BigDecimal.ZERO) < 0) {
                         // 음수 -> 음수 : 적자지속
                         changeRate = "적자지속";
                     } else {
@@ -140,6 +159,7 @@ public class WG2Test {
         return diffResults;
     }
 
+    @Getter
     static class Fs {
         String acctStd;
         String fsType;
@@ -148,16 +168,16 @@ public class WG2Test {
         String stockCd;
         String fsDt; // yyyy
         String quarter;
-        String data;
+        BigDecimal data;
 
-        public Fs(String stockCd, String fsDt, String quarter, String data) {
+        public Fs(String stockCd, String fsDt, String quarter, BigDecimal data) {
             this.stockCd = stockCd;
             this.fsDt = fsDt;
             this.quarter = quarter;
             this.data = data;
         }
 
-        public Fs(String acctStd, String fsType, String acctCd, String cumType, String stockCd, String fsDt, String quarter, String data) {
+        public Fs(String acctStd, String fsType, String acctCd, String cumType, String stockCd, String fsDt, String quarter, BigDecimal data) {
             this.acctStd = acctStd;
             this.fsType = fsType;
             this.acctCd = acctCd;
@@ -167,72 +187,25 @@ public class WG2Test {
             this.quarter = quarter;
             this.data = data;
         }
-
-        public String getAcctStd() {
-            return acctStd;
-        }
-
-        public String getFsType() {
-            return fsType;
-        }
-
-        public String getAcctCd() {
-            return acctCd;
-        }
-
-        public String getCumType() {
-            return cumType;
-        }
-
-        public String getStockCd() {
-            return stockCd;
-        }
-
-        public String getFsDt() {
-            return fsDt;
-        }
-
-        public String getQuarter() {
-            return quarter;
-        }
-
-        public String getData() {
-            return data;
-        }
     }
 
+    @Getter
+    @AllArgsConstructor
     static class W11Dto {
         String stockCd;
         String fsDt;
         String quarter;
-        String data;
-
-        public W11Dto(String stockCd, String fsDt, String quarter, String data) {
-            this.stockCd = stockCd;
-            this.fsDt = fsDt;
-            this.quarter = quarter;
-            this.data = data;
-        }
+        BigDecimal data;
     }
 
+    @Getter
+    @AllArgsConstructor
+    @ToString
     static class DiffResult {
         String stock_cd; // 주식종목코드
         String fsDt;    // 년도
         String quarter;  // 분기
         String diff;     // 차분값
-
-        public DiffResult(String stock_cd, String fsDt, String quarter, String diff) {
-            this.stock_cd = stock_cd;
-            this.fsDt = fsDt;
-            this.quarter = quarter;
-            this.diff = diff;
-        }
-
-        @Override
-        public String toString() {
-            return "종목: " + stock_cd + ", 년도: " + fsDt + ", 분기: " + quarter + ", 차분값: " + diff;
-        }
-
     }
 
 //    SELECT sc.isin, sc.stock_cd, sc.stock_nm_kr, si_max.theme_nm AS max_theme_nm, si_max.max_mk_cap
