@@ -8,6 +8,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.authentication.AuthenticationServiceException;
+import org.springframework.security.web.authentication.session.SessionAuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -94,12 +96,18 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 .body(BaseResponseFactory.create(ResultCode.Error.UNKNOWN));
     }
 
-    // todo 인증 실패, 유효기간 만료 상세 구분
-    @ExceptionHandler(ServletException.class)
-    private ResponseEntity<Object> handleServletException() {
+    @ExceptionHandler(SessionAuthenticationException.class)
+    private ResponseEntity<Object> handleServletException(SessionAuthenticationException e) {
         return ResponseEntity
                 .status(UNAUTHORIZED)
-                .body(BaseResponseFactory.create(ResultCode.Error.INVALID_CHANNEL_KEY));
+                .body(BaseResponseFactory.create(ResultCode.Error.INVALID_SESSION));
+    }
+
+    @ExceptionHandler(AuthenticationServiceException.class)
+    private ResponseEntity<Object> handleServletException(AuthenticationServiceException e) {
+        return ResponseEntity
+                .status(UNAUTHORIZED)
+                .body(BaseResponseFactory.createDetail(ResultCode.Error.INVALID_CREDENTIAL, e.getMessage()));
     }
 
     @ExceptionHandler(Exception.class)

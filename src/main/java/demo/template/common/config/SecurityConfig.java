@@ -19,9 +19,11 @@ import org.springframework.security.web.context.SecurityContextHolderFilter;
 @EnableWebSecurity
 public class SecurityConfig {
 
+    private final TokenFilter tokenFilter;
     private final ExceptionHandlerFilter exceptionHandlerFilter;
 
-    public SecurityConfig(ExceptionHandlerFilter exceptionHandlerFilter) {
+    public SecurityConfig(TokenFilter tokenFilter, ExceptionHandlerFilter exceptionHandlerFilter) {
+        this.tokenFilter = tokenFilter;
         this.exceptionHandlerFilter = exceptionHandlerFilter;
     }
 
@@ -44,7 +46,7 @@ public class SecurityConfig {
                                 .anyRequest().permitAll()
                 )
                 .addFilterBefore(exceptionHandlerFilter, SecurityContextHolderFilter.class)
-                .addFilterAfter(new TokenFilter(), SecurityContextHolderFilter.class)
+                .addFilterAfter(tokenFilter, SecurityContextHolderFilter.class)
                 .addFilterAfter(new HttpLoggingFilter(), TokenFilter.class);
 
         return httpSecurity.build();

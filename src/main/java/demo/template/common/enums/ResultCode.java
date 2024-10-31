@@ -32,6 +32,8 @@ public class ResultCode {
         INVALID_CHANNEL_ID("E470", "Invalid channel-id."),
         INVALID_CHANNEL_KEY("E471", "Invalid channel-key."),
         TOKEN_EXPIRED("E472", "Token has expired."),
+        INVALID_CREDENTIAL("E473", "Credential is invalid."),
+        INVALID_SESSION("E474", "Session is invalid."),
         API_CALL_FAILED("E544", "Internal API call failed."),
         DB_CONNECTION_ERROR("E550", "Database connection error."),
         UNKNOWN("E599", "Unknown error.");
