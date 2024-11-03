@@ -1,7 +1,9 @@
 package demo.template.sb3_3template.service.widget;
 
+import demo.template.common.utils.DateUtil;
 import demo.template.sb3_3template.dto.WidgetCreationDto;
 import demo.template.sb3_3template.entity.fs.Fs;
+import demo.template.sb3_3template.enums.FinancialClassifier;
 import demo.template.sb3_3template.enums.Tag;
 import demo.template.sb3_3template.enums.WidgetGroup;
 import demo.template.sb3_3template.model.WidgetResponse;
@@ -14,6 +16,7 @@ import demo.template.sb3_3template.repository.mart.infostock.InfostockThemeStock
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class WidgetGroup13Generator extends AbstractWidgetGenerator {
@@ -39,17 +42,35 @@ public class WidgetGroup13Generator extends AbstractWidgetGenerator {
 
     private WidgetResponse.Widget generateWidget27(WidgetCreationDto dto) {
 
-//        WidgetCreationDto.Entity stockEntity = dto.entityMap().get(Tag.STOCK.getTagName()).get(0);
-//        WidgetCreationDto.Entity financeEntity = dto.entityMap().get(Tag.FINANCE.getTagName()).get(0);
+        List<String> optional = List.of(Tag.NORMAL.getTagName(), Tag.COMPRISON.getTagName());
 
-        WidgetCreationDto.Entity stockEntity = WidgetCreationDto.Entity.builder().tag(Tag.STOCK.name()).entity("삼전").stCode(1).build();
-        WidgetCreationDto.Entity financeEntity = WidgetCreationDto.Entity.builder().tag(Tag.FINANCE.name()).entity("수익률").stCode(2).build();
+        Optional<WidgetCreationDto.Entity> period = dto.entity().stream().filter(d -> optional.contains(d.tag())).findFirst();
 
-        // 최근 6년치 데이터 조회
-        List<Fs> fs = fsRepository.findAll();
+        WidgetCreationDto.Entity stockEntity = dto.entityMap().get(Tag.STOCK.getTagName()).get(0);
+        WidgetCreationDto.Entity financeEntity = dto.entityMap().get(Tag.FINANCE.getTagName()).get(0);
 
-        return WidgetTemplateCreator.createWidget27Detail(stockEntity, financeEntity, fs);
+        FinancialClassifier financialCode = FinancialClassifier.findByFsNm(financeEntity.entity());
+
+        List<Fs> fs;
+
+        if (period.isPresent()) {
+            // 기간의 마지막 연간 재무제표
+            WidgetCreationDto.DateFrame dateFrame = dto.dateFrame();
+
+            String endYearOfPeriod = DateUtil.getLatestFinancialStatementYear(dateFrame.end());
+
+            // 최근 6년치 데이터 조회
+            fs = fsRepository.findFs(DateUtil.getMinusYear(5), endYearOfPeriod);
+
+            return WidgetTemplateCreator.createWidget27Detail(stockEntity, financeEntity, endYearOfPeriod, fs);
+        } else {
+
+            // 최근 6년치 데이터 조회
+            fs = fsRepository.findFs(DateUtil.getMinusYear(5), null);
+
+            return WidgetTemplateCreator.createWidget27Detail(stockEntity, financeEntity, null, fs);
+        }
+
     }
-
 
 }

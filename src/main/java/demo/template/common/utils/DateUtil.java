@@ -2,6 +2,7 @@ package demo.template.common.utils;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Year;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,11 +13,17 @@ import java.util.stream.Collectors;
 public class DateUtil {
 
     private static final DateTimeFormatter DEFAULT_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd");
+    private static final DateTimeFormatter YEAR_FORMATTER = DateTimeFormatter.ofPattern("yyyy");
+    public static final DateTimeFormatter YEAR_FORMATTER_KR = DateTimeFormatter.ofPattern("yyyy년");
 
     private DateUtil() {}
 
     public static LocalDateTime now() {
         return LocalDateTime.now();
+    }
+
+    public static String getMinusYear(int years) {
+        return formatDateTime(now().minusYears(years), YEAR_FORMATTER);
     }
 
     public static String getMinusDay(int days) {
@@ -25,6 +32,15 @@ public class DateUtil {
 
     public static String formatDateTime(LocalDateTime dateTime) {
         return dateTime.format(DEFAULT_DATE_FORMATTER);
+    }
+
+    public static String formatDateTime(LocalDateTime dateTime, DateTimeFormatter dateTimeFormatter) {
+        return dateTime.format(dateTimeFormatter);
+    }
+
+    public static String formatYear(String year, DateTimeFormatter formatter) {
+        Year y = Year.parse(year);
+        return y.format(formatter);
     }
 
     ////////////////////////
@@ -68,6 +84,19 @@ public class DateUtil {
             return 3; // 3분기
         } else {
             return 4; // 4분기
+        }
+    }
+
+    public static String getLatestFinancialStatementYear(String date) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        LocalDateTime dateTime = LocalDateTime.parse(date, formatter);
+        int currentYear = LocalDateTime.now().getYear();
+
+        // 올해인지 확인 후, 작년의 연도 반환
+        if (dateTime.getYear() == currentYear) {
+            return String.valueOf(currentYear - 1);
+        } else {
+            return String.valueOf(dateTime.getYear());
         }
     }
 

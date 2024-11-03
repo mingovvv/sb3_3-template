@@ -233,6 +233,8 @@ public class CustomYhStockCodeRepositoryImpl implements CustomYhStockCodeReposit
     @Override
     public Map<RankType, List<StockReturnMkCap>> findByStdDtAndBsnsDays(String stdDt, BsnsDays bsnsDays) {
 
+//        JPAExpressions.select()
+
         Map<RankType, List<StockReturnMkCap>> stockReturnMap = new HashMap<>();
 
         List<StockReturnMkCap> top5 = queryFactory

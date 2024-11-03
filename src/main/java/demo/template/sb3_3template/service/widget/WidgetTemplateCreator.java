@@ -1,6 +1,9 @@
 package demo.template.sb3_3template.service.widget;
 
+import demo.template.common.utils.DateUtil;
 import demo.template.sb3_3template.dto.WidgetCreationDto;
+import demo.template.sb3_3template.dto.projection.IndexReturnCountry;
+import demo.template.sb3_3template.dto.projection.SectorReturn;
 import demo.template.sb3_3template.dto.projection.StockInSectorDto;
 import demo.template.sb3_3template.dto.projection.StockReturnMkCap;
 import demo.template.sb3_3template.dto.widget.ItemRateValDto;
@@ -14,12 +17,18 @@ import demo.template.sb3_3template.entity.mart.infostock.InfostockSectorReturnRa
 import demo.template.sb3_3template.entity.mart.yh.YhStockMReturnRate;
 import demo.template.sb3_3template.enums.*;
 import demo.template.sb3_3template.model.WidgetResponse;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static demo.template.common.utils.DateUtil.YEAR_FORMATTER_KR;
 
 public class WidgetTemplateCreator {
 
@@ -65,7 +74,7 @@ public class WidgetTemplateCreator {
                 .build();
     }
 
-    public static WidgetResponse.Widget createWidget29Detail(Map<RankType, List<StockReturnMkCap>> stockReturnMap, Map<RankType, List<YhEcoReturnRate>> ecoReturnRates, Map<RankType, List<InfostockSectorReturnRate>> sectorReturnMap, List<StockInSectorDto> stockInSector) {
+    public static WidgetResponse.Widget createWidget29Detail(Map<RankType, List<StockReturnMkCap>> stockReturnMap, Map<RankType, List<IndexReturnCountry>> ecoReturnRates, Map<RankType, List<SectorReturn>> sectorReturnMap, List<StockInSectorDto> stockInSector) {
 
         List<String> stockHeaders = List.of("종목명", "수익률", "시가총액");
         List<String> indexHeaders = List.of("지수명", "국가명", "수익률");
@@ -90,7 +99,7 @@ public class WidgetTemplateCreator {
                     .title(key.name())
                     .headers(indexHeaders)
                     .rows(ecoReturnRates.getOrDefault(key, Collections.emptyList()).stream()
-                            .map(s -> new String[]{s.getYhEcoCode().getEcoNameKr(), s.getYhEcoCode().getCountryKr(), String.valueOf(s.getReturnRate())}).toList())
+                            .map(s -> new String[]{s.ecoNm(), s.country(), String.valueOf(s.returnRate())}).toList())
                     .build();
         }).toList();
 
@@ -100,7 +109,7 @@ public class WidgetTemplateCreator {
                     .title(key.name())
                     .headers(sectorHeaders)
                     .rows(sectorReturnMap.getOrDefault(key, Collections.emptyList()).stream()
-                            .map(s -> new String[]{s.getInfostockSectorIndex().getThemeNm(), String.valueOf(s.getReturnRate())}).toList())
+                            .map(s -> new String[]{s.sectorNm(), String.valueOf(s.returnRate())}).toList())
                     .build();
         }).toList();
 
@@ -323,61 +332,65 @@ public class WidgetTemplateCreator {
 
     }
 
-    public static WidgetResponse.Widget createWidget27Detail(WidgetCreationDto.Entity stockEntity, WidgetCreationDto.Entity financeEntity, List<Fs> fsList) {
+    public static WidgetResponse.Widget createWidget27Detail(WidgetCreationDto.Entity stockEntity, WidgetCreationDto.Entity financeEntity, String endYearOfPeriod, List<Fs> fsList) {
 
         List<String> headers = List.of("연도", financeEntity.entity(), "전년대비 성장률");
 
-        Map<String, List<Fs>> groupedByYear = fsList.stream().collect(Collectors.groupingBy(Fs::getFsDt));
+        // 순서 보장
+        Map<String, Fs> fsMap = fsList.stream().collect(Collectors.toMap(Fs::getFsDt, Function.identity(), (v1, v2) -> v2, LinkedHashMap::new));
 
-        // 각 년도의 성장률 계산
-        List<String[]> rows = groupedByYear.keySet().stream().map(year -> {
+        List<String[]> returnRows = fsMap.keySet().stream().map(year -> {
 
-            BigDecimal totalDataCurrentYear = groupedByYear.get(year).stream()
-                    .map(Fs::getData)
-                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+            String[] rows = new String[0];
 
-            String previousYear = String.valueOf(Integer.parseInt(year) - 1);
+            Fs current = fsMap.get(year);
+            BigDecimal value = current.getData();
+            Double yoyPer = current.getYoyPer();
 
-            if (groupedByYear.containsKey(previousYear)) {
+            if (ObjectUtils.isNotEmpty(yoyPer)) {
+                // yoy 값이 존재하는 경우
+                rows = new String[]{year, String.valueOf(value), String.valueOf(yoyPer)};
+            } else {
+                // yoy 값이 없는 경우
+                String previousYear = String.valueOf(Integer.parseInt(year) - 1);
 
-                BigDecimal totalDataPreviousYear = groupedByYear.get(previousYear).stream()
-                        .map(Fs::getData)
-                        .reduce(BigDecimal.ZERO, BigDecimal::add);
+                if (fsMap.containsKey(previousYear)) {
+                    Fs previous = fsMap.get(previousYear);
+                    int previousSign = previous.getData().signum();
+                    int currentSign = value.signum();
 
-                int previousSign = totalDataPreviousYear.signum();
-                int currentSign = totalDataCurrentYear.signum();
+                    if (previousSign > 0 && currentSign < 0) {
+                        rows = new String[]{year, String.valueOf(value), "적자전환"};
+                    } else if (previousSign < 0 && currentSign > 0) {
+                        rows = new String[]{year, String.valueOf(value), "흑자전환"};
+                    } else {
+                        rows = new String[]{year, String.valueOf(value), "적자지속"};
+                    }
 
-                if (previousSign > 0 && currentSign > 0) {
-                    // 양수 / 양수: 증감율 계산
-                    BigDecimal growthRate = totalDataCurrentYear.subtract(totalDataPreviousYear)
-                            .divide(totalDataPreviousYear, 1, RoundingMode.HALF_UP)
-                            .multiply(BigDecimal.valueOf(100));
-                    return new String[]{year, totalDataCurrentYear.toPlainString(), growthRate.toPlainString()};
-                } else if (previousSign > 0 && currentSign < 0) {
-                    // 양수 / 음수: 적자 전환
-                    return new String[]{year, totalDataCurrentYear.toPlainString(), "적자전환"};
-                } else if (previousSign < 0 && currentSign > 0) {
-                    // 음수 / 양수: 흑자 전환
-                    return new String[]{year, totalDataCurrentYear.toPlainString(), "흑자전환"};
-                } else if (previousSign < 0 && currentSign < 0) {
-                    // 음수 / 음수: 적자 지속
-                    return new String[]{year, totalDataCurrentYear.toPlainString(), "적자지속"};
                 }
-            }
-            return new String[]{year, totalDataCurrentYear.toPlainString(), "N/A"};
 
-        }).toList();
+                return rows;
+
+            }
+
+            return rows;
+        }).limit(5).toList();
 
         WidgetResponse.Widget.Supplement.Table table = WidgetResponse.Widget.Supplement.Table.builder()
                 .headers(headers)
-                .rows(rows)
+                .rows(returnRows)
                 .build();
 
+        Fs fs = ObjectUtils.isNotEmpty(endYearOfPeriod) ? fsMap.get(endYearOfPeriod) : fsList.get(0);
+        String year = DateUtil.formatYear(fs.getFsDt(), YEAR_FORMATTER_KR);
+        BigDecimal val = fs.getData();
+
+        // 위젯 값을 생성
         List<WidgetResponse.Widget.Values> values = List.of(
-                WidgetResponse.Widget.Values.builder().text("").build(),
+                WidgetResponse.Widget.Values.builder().text(year).build(),
                 WidgetResponse.Widget.Values.builder().text(stockEntity.entity()).build(),
                 WidgetResponse.Widget.Values.builder().text(financeEntity.entity()).build(),
-                WidgetResponse.Widget.Values.builder().text("").build());
+                WidgetResponse.Widget.Values.builder().text(String.valueOf(val)).build());
 
         return WidgetResponse.Widget.builder()
                 .widgetNo(WidgetGroup.Widget.WIDGET_27.getWNo())
@@ -388,5 +401,24 @@ public class WidgetTemplateCreator {
                         .build())
                 .build();
     }
+
+//    private static String[] calculateYoYChange(Map<String, Fs> fsMap, String currentYear, BigDecimal currentValue) {
+//        String previousYear = String.valueOf(Integer.parseInt(currentYear) - 1);
+//        if (!fsMap.containsKey(previousYear)) {
+//            return new String[0];
+//        }
+//
+//        Fs previous = fsMap.get(previousYear);
+//        int previousSign = previous.getData().signum();
+//        int currentSign = currentValue.signum();
+//
+//        if (previousSign > 0 && currentSign < 0) {
+//            return new String[]{currentYear, String.valueOf(currentValue), "적자전환"};
+//        } else if (previousSign < 0 && currentSign > 0) {
+//            return new String[]{currentYear, String.valueOf(currentValue), "흑자전환"};
+//        } else {
+//            return new String[]{currentYear, String.valueOf(currentValue), "적자지속"};
+//        }
+//    }
 
 }

@@ -47,23 +47,26 @@ public class TokenFilter extends OncePerRequestFilter {
             return;
         }
 
-        if (AUTH_URI.equals(requestURI)) {
+        setAuthentication();
+        filterChain.doFilter(request, response);
 
-            if (!validateToken(request)) throw new AuthenticationServiceException("credential does not match.");
-
-            setAuthentication();
-            filterChain.doFilter(request, response);
-
-        } else {
-
-            HttpSession session = request.getSession(false);
-            log.info("> session authorization : [{}]", session);
-            if (ObjectUtils.isEmpty(session)) throw new SessionAuthenticationException("invalid session.");
-
-            setAuthentication();
-            filterChain.doFilter(request, response);
-
-        }
+//        if (AUTH_URI.equals(requestURI)) {
+//
+//            if (!validateToken(request)) throw new AuthenticationServiceException("credential does not match.");
+//
+//            setAuthentication();
+//            filterChain.doFilter(request, response);
+//
+//        } else {
+//
+//            HttpSession session = request.getSession(false);
+//            log.info("> session authorization : [{}]", session);
+//            if (ObjectUtils.isEmpty(session)) throw new SessionAuthenticationException("invalid session.");
+//
+//            setAuthentication();
+//            filterChain.doFilter(request, response);
+//
+//        }
 
 
     }

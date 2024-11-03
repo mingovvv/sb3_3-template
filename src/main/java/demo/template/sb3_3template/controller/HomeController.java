@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @RestController
 public class HomeController {
 
@@ -32,6 +34,13 @@ public class HomeController {
             @RequestParam(value = "word") @Parameter(description = "외환헷지", example = "1") String word
     ) {
         return BaseResponseFactory.create(homeService.getSearchFinancialDictionary(word));
+    }
+
+    @GetMapping("/rc")
+    public BaseResponse<List<String>> getReCom(
+            @RequestParam(value = "userId", required = false) @Parameter(description = "사용자_ID", example = "1") String userId
+    ) {
+        return BaseResponseFactory.create(homeService.getRecom(userId));
     }
 
 }

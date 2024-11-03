@@ -32,15 +32,19 @@ public class WidgetGenerator {
 
 //        WidgetGroup group = WidgetGroup.findWidgetGroup(inferencePipelineRes.widgetGroup());
 
-        WidgetCreationDto.Entity source = WidgetCreationDto.Entity.builder().tag(Tag.STOCK.name()).entity("두산").stCode(1).build();
-        WidgetCreationDto.Entity target = WidgetCreationDto.Entity.builder().tag(Tag.FINANCE.name()).entity("수익률").stCode(2).build();
+        WidgetCreationDto.Entity e1 = WidgetCreationDto.Entity.builder().tag(Tag.STOCK.name()).entity("삼성전자").stCode(1).build();
+        WidgetCreationDto.Entity e2 = WidgetCreationDto.Entity.builder().tag(Tag.FINANCE.name()).entity("수익률").stCode(2).build();
+        WidgetCreationDto.Entity e3 = WidgetCreationDto.Entity.builder().tag(Tag.NORMAL.name()).entity("ㅋㅋ").tag("MK_NORMAL").stCode(2).build();
 
-        List<WidgetCreationDto.Entity> list = List.of(source, target);
 
-        WidgetCreationDto dto = new WidgetCreationDto(6, List.of(source, target), Map
-                .of(), null, null, null);
-
-        WidgetResponse res = strategies.get(WidgetGroup.WIDGET_GROUP_6).generate(dto, List.of(18), includeCommonWidget);
+        WidgetCreationDto dto = new WidgetCreationDto(15, List.of(e1, e2, e3), Map
+                .of(
+                        Tag.STOCK.getTagName(), List.of(new WidgetCreationDto.Entity("삼성전자", "", 1)),
+                        Tag.FINANCE.getTagName(), List.of(new WidgetCreationDto.Entity("자산", "", 1)),
+                        Tag.NORMAL.getTagName(), List.of(new WidgetCreationDto.Entity("자산", "", 1))
+                ), null, null, null, new WidgetCreationDto.DateFrame("2020-10-10 10:10:10", "2025-10-10 10:10:10"));
+//
+        WidgetResponse res = strategies.get(WidgetGroup.WIDGET_GROUP_15).generate(dto, List.of(29), includeCommonWidget);
 
         // 공통 위젯 포함 여부 확인 후 동적으로 포함
 //        if (includeCommonWidget && commonWidgetStrategy.shouldInclude(inferencePipelineRes)) {

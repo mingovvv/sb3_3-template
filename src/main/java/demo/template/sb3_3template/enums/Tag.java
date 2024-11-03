@@ -18,10 +18,12 @@ public enum Tag {
     채권("채권"),
     외환("외환"),
     경제("경제"),
-        기준금리("기준금리"),
+    기준금리("기준금리"),
     배당("배당"),
     재무("재무"),
-    팩터명("팩터명");
+    팩터명("팩터명"),
+    NORMAL("MK_NORMAL"),
+    COMPRISON("MK_COMPRISON");
 
     private String tagName;
 

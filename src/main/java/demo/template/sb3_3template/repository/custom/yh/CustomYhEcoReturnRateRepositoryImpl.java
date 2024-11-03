@@ -2,6 +2,8 @@ package demo.template.sb3_3template.repository.custom.yh;
 
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import demo.template.sb3_3template.dto.projection.IndexReturnCountry;
+import demo.template.sb3_3template.dto.projection.QIndexReturnCountry;
 import demo.template.sb3_3template.entity.mart.QYhEcoReturnRate;
 import demo.template.sb3_3template.entity.mart.YhEcoReturnRate;
 import demo.template.sb3_3template.entity.mart.YhStockReturnRate;
@@ -37,15 +39,22 @@ public class CustomYhEcoReturnRateRepositoryImpl implements CustomYhEcoReturnRat
     }
 
     @Override
-    public Map<RankType, List<YhEcoReturnRate>> findLastestIndicatorsByEcoTypeAndBsnsDays(String type, BsnsDays bsnsDays) {
+    public Map<RankType, List<IndexReturnCountry>> findLastestIndicatorsByEcoTypeAndBsnsDays(String type, BsnsDays bsnsDays) {
 
-        Map<RankType, List<YhEcoReturnRate>> ecoReturnMap = new HashMap<>();
+        Map<RankType, List<IndexReturnCountry>> ecoReturnMap = new HashMap<>();
 
         QYhEcoReturnRate subEcoReturnRate = new QYhEcoReturnRate("subEcoReturnRate");
 
-        List<YhEcoReturnRate> ecoReturn = queryFactory
-                .selectFrom(yhEcoReturnRate)
-                .join(yhEcoReturnRate.yhEcoCode, yhEcoCode).fetchJoin()
+        List<IndexReturnCountry> ecoReturn = queryFactory
+                .select(new QIndexReturnCountry(
+                        yhEcoReturnRate.ecoCode,
+                        yhEcoCode.ecoNameKr,
+                        yhEcoReturnRate.stdDt,
+                        yhEcoReturnRate.returnRate,
+                        yhEcoCode.countryKr
+                ))
+                .from(yhEcoReturnRate)
+                .join(yhEcoReturnRate.yhEcoCode, yhEcoCode)
                 .where(yhEcoReturnRate.yhEcoCode.type.eq(type)
                         .and(yhEcoReturnRate.bsnsDays.eq(bsnsDays.getBsnsDays()))
                         .and(yhEcoReturnRate.stdDt.eq(
@@ -58,8 +67,8 @@ public class CustomYhEcoReturnRateRepositoryImpl implements CustomYhEcoReturnRat
                                 )
                         )).fetch();
 
-        List<YhEcoReturnRate> top5 = ecoReturn.stream().sorted(Comparator.comparingDouble(YhEcoReturnRate::getReturnRate).reversed()).toList();
-        List<YhEcoReturnRate> bottom5 = ecoReturn.stream().sorted(Comparator.comparingDouble(YhEcoReturnRate::getReturnRate)).toList();
+        List<IndexReturnCountry> top5 = ecoReturn.stream().sorted(Comparator.comparingDouble(IndexReturnCountry::returnRate).reversed()).toList();
+        List<IndexReturnCountry> bottom5 = ecoReturn.stream().sorted(Comparator.comparingDouble(IndexReturnCountry::returnRate)).toList();
 
         ecoReturnMap.put(RankType.TOP, top5);
         ecoReturnMap.put(RankType.BOTTOM, bottom5);

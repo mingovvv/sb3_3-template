@@ -22,18 +22,21 @@ public record WidgetCreationDto(
 
         List<Widget6> widget6,
 
-        List<News> news
+        List<News> news,
+
+        DateFrame dateFrame
 
 ) {
 
     @Builder
-    public WidgetCreationDto(int widgetGroup, List<Entity> entity, Map<String, List<Entity>> entityMap, Widget5 widget5, List<Widget6> widget6, List<News> news) {
+    public WidgetCreationDto(int widgetGroup, List<Entity> entity, Map<String, List<Entity>> entityMap, Widget5 widget5, List<Widget6> widget6, List<News> news, DateFrame dateFrame) {
         this.widgetGroup = widgetGroup;
         this.entity = entity;
         this.entityMap = entityMap;
         this.widget5 = widget5;
         this.widget6 = widget6;
         this.news = news;
+        this.dateFrame = dateFrame;
     }
 
     @Builder
@@ -69,6 +72,14 @@ public record WidgetCreationDto(
         ) {
 
         }
+    }
+
+    @Builder
+    public record DateFrame(
+            String start,
+            String end
+    ) {
+
     }
 
     public static WidgetCreationDto from(InferencePipelineRes inferencePipelineRes) {

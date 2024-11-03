@@ -1,6 +1,8 @@
 package demo.template.sb3_3template.repository.custom;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import demo.template.sb3_3template.dto.projection.QSectorReturn;
+import demo.template.sb3_3template.dto.projection.SectorReturn;
 import demo.template.sb3_3template.entity.mart.infostock.InfostockSectorReturnRate;
 import demo.template.sb3_3template.enums.BsnsDays;
 import demo.template.sb3_3template.enums.RankType;
@@ -21,24 +23,34 @@ public class CustomInfostockSectorReturnRateRepositoryImpl implements  CustomInf
     }
 
     @Override
-    public Map<RankType, List<InfostockSectorReturnRate>> findByStdDtAndBsnsDays(String stdDt, BsnsDays bsnsDays) {
+    public Map<RankType, List<SectorReturn>> findByStdDtAndBsnsDays(String stdDt, BsnsDays bsnsDays) {
 
-        Map<RankType, List<InfostockSectorReturnRate>> sectorReturnMap = new HashMap<>();
+        Map<RankType, List<SectorReturn>> sectorReturnMap = new HashMap<>();
 
-        List<InfostockSectorReturnRate> top5 = queryFactory
-                .select(infostockSectorReturnRate)
+        List<SectorReturn> top5 = queryFactory
+                .select(new QSectorReturn(
+                        infostockSectorReturnRate.themeCd,
+                        infostockSectorIndex.themeNm,
+                        infostockSectorReturnRate.stdDt,
+                        infostockSectorReturnRate.returnRate
+                ))
                 .from(infostockSectorReturnRate)
-                .leftJoin(infostockSectorReturnRate.infostockSectorIndex, infostockSectorIndex).fetchJoin()
+                .leftJoin(infostockSectorReturnRate.infostockSectorIndex, infostockSectorIndex)
                 .where(infostockSectorReturnRate.stdDt.eq(stdDt)
                         .and(infostockSectorReturnRate.bsnsDays.eq(bsnsDays.getBsnsDays())))
                 .orderBy(infostockSectorReturnRate.returnRate.desc())
                 .limit(5)
                 .fetch();
 
-        List<InfostockSectorReturnRate> bottom5 = queryFactory
-                .select(infostockSectorReturnRate)
+        List<SectorReturn> bottom5 = queryFactory
+                .select(new QSectorReturn(
+                        infostockSectorReturnRate.themeCd,
+                        infostockSectorIndex.themeNm,
+                        infostockSectorReturnRate.stdDt,
+                        infostockSectorReturnRate.returnRate
+                ))
                 .from(infostockSectorReturnRate)
-                .leftJoin(infostockSectorReturnRate.infostockSectorIndex, infostockSectorIndex).fetchJoin()
+                .leftJoin(infostockSectorReturnRate.infostockSectorIndex, infostockSectorIndex)
                 .where(infostockSectorReturnRate.stdDt.eq(stdDt)
                         .and(infostockSectorReturnRate.bsnsDays.eq(bsnsDays.getBsnsDays())))
                 .orderBy(infostockSectorReturnRate.returnRate.asc())
