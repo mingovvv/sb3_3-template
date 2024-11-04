@@ -34,6 +34,6 @@ public class SpringSession {
     private Long expiryTime;
 
     @Column(name = "PRINCIPAL_NAME")
-    private Long principalName;
+    private String principalName;
 
 }

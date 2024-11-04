@@ -6,10 +6,12 @@ import demo.template.sb3_3template.dto.res.FinancialDictionaryDto;
 import demo.template.sb3_3template.dto.res.PaginationRes;
 import demo.template.sb3_3template.service.HomeService;
 import io.swagger.v3.oas.annotations.Parameter;
+import org.apache.logging.log4j.util.Base64Util;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Base64;
 import java.util.List;
 
 @RestController
@@ -33,6 +35,8 @@ public class HomeController {
     public BaseResponse<PaginationRes<FinancialDictionaryDto>> getSearchFinancialDictionary(
             @RequestParam(value = "word") @Parameter(description = "외환헷지", example = "1") String word
     ) {
+        System.out.println(word);
+        System.out.println(new String(Base64.getDecoder().decode(word)));
         return BaseResponseFactory.create(homeService.getSearchFinancialDictionary(word));
     }
 

@@ -23,7 +23,7 @@ class WG1Test {
                 new WidgetCreationDto.Widget6("이벤트3", "20241001"),
                 new WidgetCreationDto.Widget6("이벤트4", "20241002"),
                 new WidgetCreationDto.Widget6("이벤트5", "20241003")
-        ), null);
+        ), null, null);
 
         List<WidgetCreationDto.Widget6> widget6 = dto.widget6();
 

@@ -8,7 +8,6 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.security.authentication.AuthenticationServiceException;
@@ -26,6 +25,12 @@ import java.util.*;
 @Slf4j
 @Component
 public class TokenFilter extends OncePerRequestFilter {
+
+    private static final String SESSION_ID = "X-Session-Id";
+    private static final String CLIENT_ID = "X-Channel-Id";
+    private static final String REQUEST_EPOCH = "X-Request-Epoch";
+    private static final String SECRET_KEY = "X-Secret-Key";
+    private static final String SIGNATURE = "X-Signature";
 
     private final ChannelRepository channelRepository;
     private final SpringSessionRepository springSessionRepository;
@@ -47,35 +52,37 @@ public class TokenFilter extends OncePerRequestFilter {
             return;
         }
 
-        setAuthentication();
-        filterChain.doFilter(request, response);
+//        setAuthentication();
+//        filterChain.doFilter(request, response);
 
-//        if (AUTH_URI.equals(requestURI)) {
-//
-//            if (!validateToken(request)) throw new AuthenticationServiceException("credential does not match.");
-//
-//            setAuthentication();
-//            filterChain.doFilter(request, response);
-//
-//        } else {
-//
-//            HttpSession session = request.getSession(false);
-//            log.info("> session authorization : [{}]", session);
-//            if (ObjectUtils.isEmpty(session)) throw new SessionAuthenticationException("invalid session.");
-//
-//            setAuthentication();
-//            filterChain.doFilter(request, response);
-//
-//        }
+        if (AUTH_URI.equals(requestURI)) {
+
+            if (!validateToken(request)) throw new AuthenticationServiceException("credential does not match.");
+
+            setAuthentication();
+            filterChain.doFilter(request, response);
+
+        } else {
+
+            String sessionId = request.getHeader(SESSION_ID);
+            log.info("> session authorization : [{}]", sessionId);
+            if (ObjectUtils.isEmpty(sessionId)) throw new SessionAuthenticationException("invalid session.");
+
+//            springSessionRepository.findBySessionId(sessionId).orElseThrow(() -> new SessionAuthenticationException("invalid session."));
+
+            setAuthentication();
+            filterChain.doFilter(request, response);
+
+        }
 
 
     }
 
     private boolean validateToken(HttpServletRequest request) {
-        String channelId = request.getParameter("c");
-        String hmac = request.getParameter("h");
-        String unixTime = request.getParameter("ut");
-        String secretKey = request.getParameter("s");
+        String channelId = request.getHeader(CLIENT_ID);
+        String hmac = request.getHeader(SIGNATURE);
+        String unixTime = request.getHeader(REQUEST_EPOCH);
+        String secretKey = request.getHeader(SECRET_KEY);
 
         Channel channel = channelRepository.findByChannelIdAndUseYnTrue(channelId).orElseThrow(() -> new AuthenticationServiceException("'channelId' not found."));
 
