@@ -7,7 +7,7 @@ spring:
     url: url
     username: username
     password: password
-    driver-class-name:
+    driver-class-name: org.mariadb.jdbc.Driver
     hikari:
       pool-name: qna-mariadb-datasource
       auto-commit: false
@@ -23,5 +23,29 @@ spring:
 logging:
   config: classpath:logback-dev.xml
 
+api:
+  inference-pipeline:
+    url: http://localhost:8081
+    connection-timeout: 1s
+    read-timeout: 20s
+
 aes:
   secret-key: 4e6f0d8e28d0f2fa74e6c6d8e38a9f6b
+
+hash-key : 1sLRLaO99pROxf1EL6dz2PDCdMNSDT0RxjQyod6Mppc=
+
+redis:
+  service-name: sentinelmaster
+  redis-password: redis123!
+  sentinel-password: sentinel123!
+  sentinel-host-node1: 123.23.245.117
+  sentinel-host-node2: 123.23.245.118
+  sentinel-host-node3: 123.23.245.119
+  sentinel-port: 3400
+
+key:
+  mariadb-ip: aaa
+  mariadb-user: aa
+  mariadb-password: aa
+  mariadb-port: aa
+  mariadb-db: aa

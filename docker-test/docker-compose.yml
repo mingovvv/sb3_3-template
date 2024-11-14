@@ -1,0 +1,73 @@
+version: '3'
+services:
+  redis-master:
+    image: redis:6.2
+    container_name: redis-master
+    hostname: redis-master
+    ports:
+      - "6379:6379"
+    command: ["redis-server", "--appendonly", "yes"]
+
+  redis-slave1:
+    image: redis:6.2
+    container_name: redis-slave1
+    depends_on:
+      - redis-master
+    command: ["redis-server", "--replicaof", "redis-master", "6379"]
+    ports:
+      - "6380:6379"
+
+  redis-slave2:
+    image: redis:6.2
+    container_name: redis-slave2
+    depends_on:
+      - redis-master
+    command: ["redis-server", "--replicaof", "redis-master", "6379"]
+    ports:
+      - "6381:6379"
+
+  sentinel1:
+    image: redis:6.2
+    container_name: sentinel1
+    depends_on:
+      - redis-master
+      - redis-slave1
+    ports:
+      - "26379:26379"
+    command: >
+      sh -c "echo 'port 26379' > /tmp/sentinel.conf && 
+             echo 'sentinel monitor mymaster 127.0.0.1 6379 2' >> /tmp/sentinel.conf &&
+             echo 'sentinel down-after-milliseconds mymaster 5000' >> /tmp/sentinel.conf &&
+             echo 'sentinel failover-timeout mymaster 10000' >> /tmp/sentinel.conf &&
+             echo 'sentinel parallel-syncs mymaster 1' >> /tmp/sentinel.conf &&
+             redis-sentinel /tmp/sentinel.conf"
+
+  sentinel2:
+    image: redis:6.2
+    container_name: sentinel2
+    depends_on:
+      - redis-master
+    ports:
+      - "26380:26379"
+    command: >
+      sh -c "echo 'port 26379' > /tmp/sentinel.conf && 
+             echo 'sentinel monitor mymaster 127.0.0.1 6379 2' >> /tmp/sentinel.conf &&
+             echo 'sentinel down-after-milliseconds mymaster 5000' >> /tmp/sentinel.conf &&
+             echo 'sentinel failover-timeout mymaster 10000' >> /tmp/sentinel.conf &&
+             echo 'sentinel parallel-syncs mymaster 1' >> /tmp/sentinel.conf &&
+             redis-sentinel /tmp/sentinel.conf"
+
+  sentinel3:
+    image: redis:6.2
+    container_name: sentinel3
+    depends_on:
+      - redis-master
+    ports:
+      - "26381:26379"
+    command: >
+      sh -c "echo 'port 26379' > /tmp/sentinel.conf && 
+             echo 'sentinel monitor mymaster 127.0.0.1 6379 2' >> /tmp/sentinel.conf &&
+             echo 'sentinel down-after-milliseconds mymaster 5000' >> /tmp/sentinel.conf &&
+             echo 'sentinel failover-timeout mymaster 10000' >> /tmp/sentinel.conf &&
+             echo 'sentinel parallel-syncs mymaster 1' >> /tmp/sentinel.conf &&
+             redis-sentinel /tmp/sentinel.conf"
