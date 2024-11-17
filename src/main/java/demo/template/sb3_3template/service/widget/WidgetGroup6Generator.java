@@ -1,6 +1,7 @@
 package demo.template.sb3_3template.service.widget;
 
 import demo.template.sb3_3template.dto.WidgetCreationDto;
+import demo.template.sb3_3template.dto.projection.StockMonthlyReturn;
 import demo.template.sb3_3template.dto.widget.ItemRateValDto;
 import demo.template.sb3_3template.dto.widget.W11Dto;
 import demo.template.sb3_3template.dto.widget.W18Dto;
@@ -67,14 +68,17 @@ public class WidgetGroup6Generator extends AbstractWidgetGenerator {
         W18Dto sourceData = getWidget18Data(entity);
         if (ObjectUtils.isEmpty(sourceData)) return null;
 
-        List<YhStockMReturnRate> largeStockMReturn = yhStockMReturnRateRepository.findByStockDtGoe("202210", "20241026", String.valueOf(StockCategory.LARGE.getMinMarketCap()), String.valueOf(StockCategory.LARGE.getMaxMarketCap()));
-        List<ItemRateValDto> large = largeStockMReturn.stream().map(s -> new ItemRateValDto(s.getStockCd(), s.getYhStockCode().getStockNameKr(), s.getStockDt(), s.getReturnRateM(), null)).toList();
+        List<StockMonthlyReturn> stockMonthlyReturns = yhStockMReturnRateRepository.findByStockDtGoe("202201", "20231101");
 
-        List<YhStockMReturnRate> middleStockMReturn = yhStockMReturnRateRepository.findByStockDtGoe("202210", "20241026", String.valueOf(StockCategory.MEDIUM.getMinMarketCap()), String.valueOf(StockCategory.MEDIUM.getMaxMarketCap()));
-        List<ItemRateValDto> middle = middleStockMReturn.stream().map(s -> new ItemRateValDto(s.getStockCd(), s.getYhStockCode().getStockNameKr(), s.getStockDt(), s.getReturnRateM(), null)).toList();
+        Map<StockCategory, List<StockMonthlyReturn>> stockCategoryListMap = StockCategory.categorizeStocks(stockMonthlyReturns);
 
-        List<YhStockMReturnRate> smallStockMReturn = yhStockMReturnRateRepository.findByStockDtGoe("202210", "20241026", String.valueOf(StockCategory.SMALL.getMinMarketCap()), String.valueOf(StockCategory.SMALL.getMaxMarketCap()));
-        List<ItemRateValDto> small = smallStockMReturn.stream().map(s -> new ItemRateValDto(s.getStockCd(), s.getYhStockCode().getStockNameKr(), s.getStockDt(), s.getReturnRateM(), null)).toList();
+        List<StockMonthlyReturn> largeStocks = stockCategoryListMap.get(StockCategory.LARGE);
+        List<StockMonthlyReturn> mediumStocks = stockCategoryListMap.get(StockCategory.MEDIUM);
+        List<StockMonthlyReturn> SmallStocks = stockCategoryListMap.get(StockCategory.SMALL);
+
+        List<ItemRateValDto> large = largeStocks.stream().map(s -> new ItemRateValDto(s.stockCd(), s.stockNm(), s.stockDt(), s.returnRateM(), null)).toList();
+        List<ItemRateValDto> middle = mediumStocks.stream().map(s -> new ItemRateValDto(s.stockCd(), s.stockNm(), s.stockDt(), s.returnRateM(), null)).toList();
+        List<ItemRateValDto> small = SmallStocks.stream().map(s -> new ItemRateValDto(s.stockCd(), s.stockNm(), s.stockDt(), s.returnRateM(), null)).toList();
 
         return WidgetTemplateCreator.createWidget18Detail(sourceData, large, middle, small);
 
@@ -91,7 +95,7 @@ public class WidgetGroup6Generator extends AbstractWidgetGenerator {
 
     private W18Dto generateWidgetStock(String stockNm) {
 
-        List<YhStockMReturnRate> stockMReturn = yhStockMReturnRateRepository.findByStockNmAndStockDtGoe(stockNm, "202210");
+        List<YhStockMReturnRate> stockMReturn = yhStockMReturnRateRepository.findByStockNmAndStockDtGoe(stockNm, "202201");
         if (stockMReturn.isEmpty()) return null;
 
         return W18Dto.fromStock(stockMReturn);
@@ -99,7 +103,7 @@ public class WidgetGroup6Generator extends AbstractWidgetGenerator {
 
     private W18Dto generateWidgetSector(String sectorNm) {
 
-        List<InfostockSectorReturnRateM> sectorMReturn = infostockSectorReturnRateMRepository.findByThemeNmAndThemeDtGoe(sectorNm, "202210");
+        List<InfostockSectorReturnRateM> sectorMReturn = infostockSectorReturnRateMRepository.findByThemeNmAndThemeDtGoe(sectorNm, "202201");
         if (sectorMReturn.isEmpty()) return null;
 
         return W18Dto.fromSector(sectorMReturn);
@@ -107,8 +111,8 @@ public class WidgetGroup6Generator extends AbstractWidgetGenerator {
 
     private W18Dto generateWidgetEco(String ecoNm) {
 
-        List<YhEcoMReturnRate> ecoMReturn = yhEcoMReturnRateRepository.findEcoNmAndEcoDtGoe(ecoNm, "202210");
-        List<YhEcoClose> ecoMonthClose = yhEcoCloseRepository.findEcoNmAndStdDtGoe(ecoNm, "20221010", "M");
+        List<YhEcoMReturnRate> ecoMReturn = yhEcoMReturnRateRepository.findEcoNmAndEcoDtGoe(ecoNm, "202201");
+        List<YhEcoClose> ecoMonthClose = yhEcoCloseRepository.findEcoNmAndStdDtGoe(ecoNm, "202201", "M");
 
         return W18Dto.fromEco(ecoMReturn, ecoMonthClose);
     }

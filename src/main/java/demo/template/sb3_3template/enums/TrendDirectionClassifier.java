@@ -1,6 +1,7 @@
 package demo.template.sb3_3template.enums;
 
 import demo.template.sb3_3template.dto.widget.ItemRateValDto;
+import demo.template.sb3_3template.dto.widget.MatchRatios;
 import demo.template.sb3_3template.dto.widget.MonthlyTrend;
 import lombok.Getter;
 
@@ -49,45 +50,49 @@ public enum TrendDirectionClassifier {
         List<MonthlyTrend> result = new ArrayList<>();
 
         TrendDirectionClassifier indicator = INDICATOR_BY_ECOCODE_MAP.getOrDefault(itemCd, DEFAULT);
+        int sequentialMonth = indicator.sequentialMonth;
         Integer minOriginValue = indicator.rawSeries;
 
-        for (int i = 0; i < indicator.sequentialMonth - 1; i++) {
-            result.add(new MonthlyTrend(dtoList.get(i).yearMonth(), TrendDirection.NOT_AVAILABLE));
+        if (dtoList.size() < indicator.sequentialMonth) {
+            return result; // 또는 적절한 에러 처리
         }
 
-        for (int i = indicator.sequentialMonth - 1; i < dtoList.size(); i++) {
+        // 첫 번째 sequentialMonth - 1개의 데이터는 항상 NOT_AVAILABLE 설정
+        for (int i = 0; i < sequentialMonth; i++) {
+            result.add(new MonthlyTrend(dtoList.get(i).yearMonth(), TrendDirection.NOT_AVAILABLE, dtoList.get(i).mRate()));
+        }
+
+        // 데이터가 충분하지 않은 경우 처리
+        if (dtoList.size() < sequentialMonth) {
+            return result; // 데이터가 부족할 경우, 이미 채운 NOT_AVAILABLE만 반환
+        }
+
+        for (int i = sequentialMonth; i < dtoList.size(); i++) {
 
             boolean up = true;
             boolean down = true;
 
+            // 이전 sequentialMonth 개월의 데이터를 비교
             for (int j = 0; j < indicator.sequentialMonth ; j++) {
 
-                double preMRate = 0.0;
-                if (i - j - 1 >= 0) {
-                    preMRate = dtoList.get(i - j - 1).mRate();
-                }
+                ItemRateValDto preDto = dtoList.get(i - j - 1);
+                ItemRateValDto currentDto = dtoList.get(i - j);
 
-                ItemRateValDto current = dtoList.get(i - j);
-                double mRate = current.mRate();
 
-                if (mRate <= preMRate || (minOriginValue != null && Integer.parseInt(current.val()) < minOriginValue)) {
+                if (currentDto.mRate() <= preDto.mRate() || (minOriginValue != null && Integer.parseInt(currentDto.val()) < minOriginValue)) {
                     up = false;
                 }
 
-                if (mRate >= preMRate || (minOriginValue != null && Integer.parseInt(current.val()) > minOriginValue)) {
+                if (currentDto.mRate() >= preDto.mRate() || (minOriginValue != null && Integer.parseInt(currentDto.val()) > minOriginValue)) {
                     down = false;
                 }
 
             }
 
-            MonthlyTrend monthlyTrend = new MonthlyTrend(dtoList.get(i).yearMonth(), TrendDirection.FLAT);
-            if (up) {
-                monthlyTrend = new MonthlyTrend(dtoList.get(i).yearMonth(), TrendDirection.UP);
-            } else if (down) {
-                monthlyTrend = new MonthlyTrend(dtoList.get(i).yearMonth(), TrendDirection.DOWN);
-            }
+            // 트렌드 결정
+            TrendDirection trendDirection = up ? TrendDirection.UP : down ? TrendDirection.DOWN : TrendDirection.FLAT;
 
-            result.add(monthlyTrend);
+            result.add(new MonthlyTrend(dtoList.get(i).yearMonth(), trendDirection, dtoList.get(i).mRate()));
 
         }
 
@@ -96,27 +101,41 @@ public enum TrendDirectionClassifier {
 
     }
 
-    public static double[] calculateMatchRatios(List<MonthlyTrend> list1, List<MonthlyTrend> list2) {
+    public static MatchRatios calculateMatchRatios(List<MonthlyTrend> list1, List<MonthlyTrend> list2) {
 
         int upMatchCount = 0;
         int downMatchCount = 0;
-        int totalCount = list1.size();
+        int totalUpCount = 0;
+        int totalDownCount = 0;
 
-        for (int i = 0; i < totalCount; i++) {
-            TrendDirection direction1 = list1.get(i).direction();
-            TrendDirection direction2 = list2.get(i).direction();
+        // target
+        Map<String, TrendDirection> targetMap = list2.stream()
+                .collect(Collectors.toMap(MonthlyTrend::yearMonth, MonthlyTrend::direction));
 
-            if (direction1 == TrendDirection.UP && direction2 == TrendDirection.UP) {
-                upMatchCount++;
-            } else if (direction1 == TrendDirection.DOWN && direction2 == TrendDirection.DOWN) {
-                downMatchCount++;
+        for (MonthlyTrend sourceMonthlyTrend : list1) {
+            TrendDirection sourceDirection = sourceMonthlyTrend.direction();
+            TrendDirection targetDirection = targetMap.getOrDefault(sourceMonthlyTrend.yearMonth(), TrendDirection.FLAT);
+
+            if (sourceDirection == TrendDirection.UP) {
+                totalUpCount++;
+                if (targetDirection == TrendDirection.UP) {
+                    upMatchCount++;
+                }
+            } else if (sourceDirection == TrendDirection.DOWN) {
+                totalDownCount++;
+                if (targetDirection == TrendDirection.DOWN) {
+                    downMatchCount++;
+                }
             }
         }
 
-        double upMatchRatio = (double) upMatchCount / totalCount;
-        double downMatchRatio = (double) downMatchCount / totalCount;
+        // 상승 및 하락 매칭 비율 계산
+        double upMatchRatio = totalUpCount > 0 ? Math.round((double) upMatchCount / totalUpCount * 1000) / 10.0 : 0.0;
+        double downMatchRatio = totalDownCount > 0 ? Math.round((double) downMatchCount / totalDownCount * 1000) / 10.0 : 0.0;
+        double avgMonthlyReturnWhenUp = Math.round(list2.stream().filter(s -> s.direction() == TrendDirection.UP).mapToDouble(MonthlyTrend::mRate).average().orElse(0.0) * 10) / 10.0;
+        double avgMonthlyReturnWhenDown = Math.round(list2.stream().filter(s -> s.direction() == TrendDirection.DOWN).mapToDouble(MonthlyTrend::mRate).average().orElse(0.0 * 10)) / 10.0;
 
-        return new double[] { upMatchRatio, downMatchRatio, upMatchCount, downMatchCount };
+        return new MatchRatios(upMatchRatio, downMatchRatio, upMatchCount, downMatchCount, avgMonthlyReturnWhenUp, avgMonthlyReturnWhenDown);
     }
 
 }

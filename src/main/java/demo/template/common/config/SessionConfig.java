@@ -44,9 +44,9 @@ public class SessionConfig {
         public List<String> resolveSessionIds(HttpServletRequest request) {
             List<String> sessionIds = super.resolveSessionIds(request);
 
-            if (sessionIds.isEmpty() || !isValidSession(sessionIds.get(0))) {
-                throw new ResponseStatusException(UNAUTHORIZED, "Invalid session ID.");
-            }
+//            if (sessionIds.isEmpty() || !isValidSession(sessionIds.get(0))) {
+//                throw new ResponseStatusException(UNAUTHORIZED, "Invalid session ID.");
+//            }
             return sessionIds;
         }
 

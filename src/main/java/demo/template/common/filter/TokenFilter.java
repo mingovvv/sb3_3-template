@@ -53,27 +53,27 @@ public class TokenFilter extends OncePerRequestFilter {
         }
 
 //        setAuthentication();
-//        filterChain.doFilter(request, response);
+        filterChain.doFilter(request, response);
 
-        if (AUTH_URI.equals(requestURI)) {
-
-            if (!validateToken(request)) throw new AuthenticationServiceException("credential does not match.");
-
-            setAuthentication();
-            filterChain.doFilter(request, response);
-
-        } else {
-
-            String sessionId = request.getHeader(SESSION_ID);
-            log.info("> session authorization : [{}]", sessionId);
-            if (ObjectUtils.isEmpty(sessionId)) throw new SessionAuthenticationException("invalid session.");
-
-//            springSessionRepository.findBySessionId(sessionId).orElseThrow(() -> new SessionAuthenticationException("invalid session."));
-
-            setAuthentication();
-            filterChain.doFilter(request, response);
-
-        }
+//        if (AUTH_URI.equals(requestURI)) {
+//
+//            if (!validateToken(request)) throw new AuthenticationServiceException("credential does not match.");
+//
+//            setAuthentication();
+//            filterChain.doFilter(request, response);
+//
+//        } else {
+//
+//            String sessionId = request.getHeader(SESSION_ID);
+//            log.info("> session authorization : [{}]", sessionId);
+//            if (ObjectUtils.isEmpty(sessionId)) throw new SessionAuthenticationException("invalid session.");
+//
+////            springSessionRepository.findBySessionId(sessionId).orElseThrow(() -> new SessionAuthenticationException("invalid session."));
+//
+//            setAuthentication();
+//            filterChain.doFilter(request, response);
+//
+//        }
 
 
     }

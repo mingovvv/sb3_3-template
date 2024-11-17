@@ -13,6 +13,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 
 import javax.sql.DataSource;
 
+@Profile({"dev", "prod"})
 @Configuration
 public class DynamicDataSourceConfig {
 

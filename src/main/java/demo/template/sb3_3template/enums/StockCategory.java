@@ -1,6 +1,12 @@
 package demo.template.sb3_3template.enums;
 
+import demo.template.sb3_3template.dto.projection.StockMonthlyReturn;
 import lombok.Getter;
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Getter
 public enum StockCategory {
@@ -18,13 +24,18 @@ public enum StockCategory {
         this.maxMarketCap = maxMarketCap;
     }
 
-    public static StockCategory fromMarketCap(long marketCap) {
-        for (StockCategory category : StockCategory.values()) {
-            if (marketCap >= category.minMarketCap && marketCap <= category.maxMarketCap) {
-                return category;
-            }
-        }
-        throw new IllegalArgumentException("Invalid market cap value: " + marketCap);
+    public static Map<StockCategory, List<StockMonthlyReturn>> categorizeStocks(List<StockMonthlyReturn> stocks) {
+        return stocks.stream()
+                .collect(Collectors.groupingBy(stock -> {
+                    long marketCap = StringUtils.isEmpty(stock.idxCalMkCap()) ? 0 : Long.parseLong(stock.idxCalMkCap());
+                    if (marketCap >= LARGE.minMarketCap && marketCap <= LARGE.maxMarketCap) {
+                        return LARGE;
+                    } else if (marketCap >= MEDIUM.minMarketCap && marketCap <= MEDIUM.maxMarketCap) {
+                        return MEDIUM;
+                    } else {
+                        return SMALL;
+                    }
+                }));
     }
 
 }

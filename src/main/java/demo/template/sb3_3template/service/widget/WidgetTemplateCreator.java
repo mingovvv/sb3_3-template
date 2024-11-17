@@ -6,27 +6,16 @@ import demo.template.sb3_3template.dto.projection.IndexReturnCountry;
 import demo.template.sb3_3template.dto.projection.SectorReturn;
 import demo.template.sb3_3template.dto.projection.StockInSectorDto;
 import demo.template.sb3_3template.dto.projection.StockReturnMkCap;
-import demo.template.sb3_3template.dto.widget.ItemRateValDto;
-import demo.template.sb3_3template.dto.widget.MonthlyTrend;
-import demo.template.sb3_3template.dto.widget.W11Dto;
-import demo.template.sb3_3template.dto.widget.W18Dto;
+import demo.template.sb3_3template.dto.widget.*;
 import demo.template.sb3_3template.entity.fs.Fs;
-import demo.template.sb3_3template.entity.mart.YhEcoReturnRate;
-import demo.template.sb3_3template.entity.mart.YhStockReturnRate;
-import demo.template.sb3_3template.entity.mart.infostock.InfostockSectorReturnRate;
-import demo.template.sb3_3template.entity.mart.yh.YhStockMReturnRate;
 import demo.template.sb3_3template.enums.*;
 import demo.template.sb3_3template.model.WidgetResponse;
 import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static demo.template.common.utils.DateUtil.YEAR_FORMATTER_KR;
 
@@ -150,23 +139,23 @@ public class WidgetTemplateCreator {
         long sourceDownCnt = sourceMonthlyTrend.stream().filter(s -> s.direction() == TrendDirection.DOWN).count();
         long targetUpCnt = targetMonthlyTrend.stream().filter(s -> s.direction() == TrendDirection.UP).count();
         long targetDownCnt = targetMonthlyTrend.stream().filter(s -> s.direction() == TrendDirection.DOWN).count();
-        double[] matchRatios = TrendDirectionClassifier.calculateMatchRatios(sourceMonthlyTrend, targetMonthlyTrend);
+        MatchRatios matchRatios = TrendDirectionClassifier.calculateMatchRatios(sourceMonthlyTrend, targetMonthlyTrend);
 
         List<ItemRateValDto> top3 = sourceData.table().stream().sorted(Comparator.comparingDouble(ItemRateValDto::mRate).reversed()).limit(3).toList();
         List<ItemRateValDto> bottom3 = sourceData.table().stream().sorted(Comparator.comparingDouble(ItemRateValDto::mRate)).limit(3).toList();
-        Map<String, Double> sourceMRetunMap = sourceData.table().stream().collect(Collectors.toMap(ItemRateValDto::yearMonth, ItemRateValDto::mRate));
+
         Map<String, Double> targetMRetunMap = targetData.table().stream().collect(Collectors.toMap(ItemRateValDto::yearMonth, ItemRateValDto::mRate));
 
         WidgetResponse.Widget.Supplement.Table sourceUpTable = WidgetResponse.Widget.Supplement.Table.builder()
                 .title(String.format("%s 상승 시 %s 변화", sourceData.itemNm(), targetData.itemNm()))
                 .headers(headers)
-                .rows(top3.stream().map(s -> new String[]{String.valueOf(s.mRate()), String.valueOf(targetMRetunMap.getOrDefault(s.yearMonth(), 0.0))}).toList())
+                .rows(top3.stream().map(s -> new String[]{s.yearMonth(), String.valueOf(s.mRate()), String.valueOf(targetMRetunMap.getOrDefault(s.yearMonth(), 0.0))}).toList())
                 .build();
 
         WidgetResponse.Widget.Supplement.Table sourceDownTable = WidgetResponse.Widget.Supplement.Table.builder()
                 .title(String.format("%s 하락 시 %s 변화", sourceData.itemNm(), targetData.itemNm()))
                 .headers(headers)
-                .rows(bottom3.stream().map(s -> new String[]{String.valueOf(s.mRate()), String.valueOf(targetMRetunMap.getOrDefault(s.yearMonth(), 0.0))}).toList())
+                .rows(bottom3.stream().map(s -> new String[]{s.yearMonth(), String.valueOf(s.mRate()), String.valueOf(targetMRetunMap.getOrDefault(s.yearMonth(), 0.0))}).toList())
                 .build();
 
         tables.add(sourceUpTable);
@@ -175,27 +164,11 @@ public class WidgetTemplateCreator {
         WidgetResponse.Widget.Supplement.LineChart sourceChart = WidgetResponse.Widget.Supplement.LineChart.builder()
                 .xaxis(sourceData.graph().stream().map(W11Dto.Graph::stdDt).toList())
                 .yaxis(sourceData.graph().stream().map(W11Dto.Graph::val).toList())
-//                .additionalValue(sourceData.graph().stream().map(s -> {
-//                    if (s.stdDt().endsWith("15")) {
-//                        return String.valueOf(sourceMRetunMap.getOrDefault(s.stdDt().substring(0, 6), 0.0));
-//                    } else {
-//                        return "";
-//                    }
-//                }).toList())
-                .additionalValue(sourceData.table().stream().map(s -> s.yearMonth() + "|" + s.mRate()).toList())
                 .build();
 
         WidgetResponse.Widget.Supplement.LineChart targetChart = WidgetResponse.Widget.Supplement.LineChart.builder()
                 .xaxis(targetData.graph().stream().map(W11Dto.Graph::stdDt).toList())
                 .yaxis(targetData.graph().stream().map(W11Dto.Graph::val).toList())
-//                .additionalValue(targetData.graph().stream().map(s -> {
-//                    if (s.stdDt().endsWith("15")) {
-//                        return String.valueOf(targetMRetunMap.getOrDefault(s.stdDt().substring(0, 6), 0.0));
-//                    } else {
-//                        return "";
-//                    }
-//                }).toList())
-                .additionalValue(targetData.table().stream().map(s -> s.yearMonth() + "|" + s.mRate()).toList())
                 .build();
 
         lineCharts.add(sourceChart);
@@ -204,12 +177,12 @@ public class WidgetTemplateCreator {
         List<WidgetResponse.Widget.Values> values = List.of(
                 WidgetResponse.Widget.Values.builder().text(sourceData.itemNm()).build(),
                 WidgetResponse.Widget.Values.builder().text(targetData.itemNm()).build(),
-                WidgetResponse.Widget.Values.builder().text(String.valueOf(matchRatios[0])).build(),
+                WidgetResponse.Widget.Values.builder().text(String.valueOf(matchRatios.upMatchRatio())).build(),
                 WidgetResponse.Widget.Values.builder().text(sourceData.itemNm()).build(),
                 WidgetResponse.Widget.Values.builder().text(String.valueOf(sourceUpCnt)).build(),
                 WidgetResponse.Widget.Values.builder().text(targetData.itemNm()).build(),
                 WidgetResponse.Widget.Values.builder().text(String.valueOf(targetUpCnt)).build(),
-                WidgetResponse.Widget.Values.builder().text(String.valueOf(matchRatios[1])).build(),
+                WidgetResponse.Widget.Values.builder().text(String.valueOf(matchRatios.downMatchRatio())).build(),
                 WidgetResponse.Widget.Values.builder().text(sourceData.itemNm()).build(),
                 WidgetResponse.Widget.Values.builder().text(String.valueOf(sourceDownCnt)).build(),
                 WidgetResponse.Widget.Values.builder().text(targetData.itemNm()).build(),
@@ -229,47 +202,41 @@ public class WidgetTemplateCreator {
 
     public static WidgetResponse.Widget createWidget18Detail(W18Dto sourceData, List<ItemRateValDto> large, List<ItemRateValDto> middle, List<ItemRateValDto> small) {
 
-        List<String> headers = List.of("종목명", "동반 상승 확률(횟수)", "동반 하락 확률(횟수)", "상승 평균 수익률", "하락 평균 수익률");
+        String sourceName = sourceData.itemNm();
+        List<MonthlyTrend> sourceTrends = TrendDirectionClassifier.analyzeTrendDirection(sourceData.itemCd(), sourceData.table());
 
-        List<ItemRateValDto> sourceDto = sourceData.table();
-        List<MonthlyTrend> source = TrendDirectionClassifier.analyzeTrendDirection(sourceData.itemCd(), sourceDto);
+        Map<String, List<ItemRateValDto>> largeGrouped = large.stream().filter(stock -> !stock.itemNm().equalsIgnoreCase(sourceName)).collect(Collectors.groupingBy(ItemRateValDto::itemNm));
+        Map<String, List<ItemRateValDto>> middleGrouped = middle.stream().filter(stock -> !stock.itemNm().equalsIgnoreCase(sourceName)).collect(Collectors.groupingBy(ItemRateValDto::itemNm));
+        Map<String, List<ItemRateValDto>> smallGrouped = small.stream().filter(stock -> !stock.itemNm().equalsIgnoreCase(sourceName)).collect(Collectors.groupingBy(ItemRateValDto::itemNm));
 
-        Map<String, List<ItemRateValDto>> largeGroup = large.stream().collect(Collectors.groupingBy(ItemRateValDto::itemNm,
-                Collectors.collectingAndThen(Collectors.toList(),
-                        list -> list.stream().sorted(Comparator.comparing(ItemRateValDto::yearMonth)).collect(Collectors.toList()))));
+        Map<String, MatchRatios> largeRatios = largeGrouped.entrySet().stream().collect(Collectors.toMap(
+                Map.Entry::getKey, entry -> TrendDirectionClassifier.calculateMatchRatios(sourceTrends, TrendDirectionClassifier.analyzeTrendDirection(entry.getValue().get(0).itemCd(), entry.getValue()))
+        ));
 
-        Map<String, List<ItemRateValDto>> middleGroup = middle.stream().collect(Collectors.groupingBy(ItemRateValDto::itemNm,
-                Collectors.collectingAndThen(Collectors.toList(),
-                        list -> list.stream().sorted(Comparator.comparing(ItemRateValDto::yearMonth)).collect(Collectors.toList()))));
+        Map<String, MatchRatios> middleRatios = middleGrouped.entrySet().stream().collect(Collectors.toMap(
+                Map.Entry::getKey, entry -> TrendDirectionClassifier.calculateMatchRatios(sourceTrends, TrendDirectionClassifier.analyzeTrendDirection(entry.getValue().get(0).itemCd(), entry.getValue()))
+        ));
 
-        Map<String, List<ItemRateValDto>> smallGroup = small.stream().collect(Collectors.groupingBy(ItemRateValDto::itemNm,
-                Collectors.collectingAndThen(Collectors.toList(),
-                        list -> list.stream().sorted(Comparator.comparing(ItemRateValDto::yearMonth)).collect(Collectors.toList()))));
+        Map<String, MatchRatios> smallRatios = smallGrouped.entrySet().stream().collect(Collectors.toMap(
+                Map.Entry::getKey, entry -> TrendDirectionClassifier.calculateMatchRatios(sourceTrends, TrendDirectionClassifier.analyzeTrendDirection(entry.getValue().get(0).itemCd(), entry.getValue()))
+        ));
 
-        Map<StockCategory, Map<String, List<ItemRateValDto>>> groupMap = Map.of(StockCategory.LARGE, largeGroup, StockCategory.MEDIUM, middleGroup, StockCategory.SMALL, smallGroup);
+        List<String[]> largeUpTop3 = get3ItemsByRatio(largeRatios, TrendDirection.UP);
+        List<String[]> middleUpTop3 = get3ItemsByRatio(middleRatios, TrendDirection.UP);
+        List<String[]> smallUpTop3 = get3ItemsByRatio(smallRatios, TrendDirection.UP);
+
+        List<String[]> largeDownTop3 = get3ItemsByRatio(largeRatios, TrendDirection.DOWN);
+        List<String[]> middleDownTop3 = get3ItemsByRatio(middleRatios, TrendDirection.DOWN);
+        List<String[]> smallDownTop3 = get3ItemsByRatio(smallRatios, TrendDirection.DOWN);
 
         List<WidgetResponse.Widget.Supplement.Table> tables = new ArrayList<>();
 
-        groupMap.forEach((category, grouped) -> {
-
-            List<String[]> xaxis = grouped.entrySet().stream().map(s -> {
-                String key = s.getKey();
-                List<ItemRateValDto> value = s.getValue();
-                OptionalDouble average = value.stream().mapToDouble(ItemRateValDto::mRate).average();
-                List<MonthlyTrend> monthlyTrends = TrendDirectionClassifier.analyzeTrendDirection(key, value);
-                double[] matchRatios = TrendDirectionClassifier.calculateMatchRatios(source, monthlyTrends);
-                return new String[]{key, String.format("%s|%s", matchRatios[0], (int) matchRatios[2]), String.format("%s|%s", matchRatios[1], (int) matchRatios[3]), String.valueOf(average)};
-            }).toList();
-
-            WidgetResponse.Widget.Supplement.Table table = WidgetResponse.Widget.Supplement.Table.builder()
-                    .title(category.getDescription())
-                    .headers(headers)
-                    .rows(xaxis)
-                    .build();
-
-            tables.add(table);
-
-        });
+        tables.add(createTable("오를때|대형주", List.of("종목명", "동반상승확률(횟수)", "수익률"), largeUpTop3));
+        tables.add(createTable("오를때|중형주", List.of("종목명", "동반상승확률(횟수)", "수익률"), middleUpTop3));
+        tables.add(createTable("오를때|소형주", List.of("종목명", "동반상승확률(횟수)", "수익률"), smallUpTop3));
+        tables.add(createTable("내릴때|대형주", List.of("종목명", "동반하락확률(횟수)", "수익률"), largeDownTop3));
+        tables.add(createTable("내릴때|중형주", List.of("종목명", "동반하락확률(횟수)", "수익률"), middleDownTop3));
+        tables.add(createTable("내릴때|소형주", List.of("종목명", "동반하락확률(횟수)", "수익률"), smallDownTop3));
 
         List<WidgetResponse.Widget.Values> values = List.of(
                 WidgetResponse.Widget.Values.builder().text(sourceData.itemNm()).style("strong").build(),
@@ -289,47 +256,32 @@ public class WidgetTemplateCreator {
                         .build())
                 .build();
 
-//        for (Map<String, List<ItemRateValDto>> groupMap : group) {
-//
-//            List<String[]> xaxis = groupMap.entrySet().stream().map(s -> {
-//                String key = s.getKey();
-//                List<ItemRateValDto> value = s.getValue();
-//                OptionalDouble average = value.stream().mapToDouble(ItemRateValDto::mRate).average();
-//                List<MonthlyTrend> monthlyTrends = TrendDirectionClassifier.analyzeTrendDirection(key, value);
-//                double[] matchRatios = TrendDirectionClassifier.calculateMatchRatios(source, monthlyTrends);
-//                return new String[]{key, String.format("%s|%s",matchRatios[0], (int) matchRatios[2]), String.format("%s|%s",matchRatios[1], (int) matchRatios[3]), String.valueOf(average)};
-//            }).toList();
-//
-//            WidgetResponse.Widget.Supplement.Table table = WidgetResponse.Widget.Supplement.Table.builder()
-//                    .title(StockCategory.LARGE.getDescription())
-//                    .headers(headers)
-//                    .rows(xaxis)
-//                    .build();
-//
-//            tables.add(table);
-//        }
+    }
 
-//        for (Map<String, List<ItemRateValDto>> groupMap : group) {
-//
-//            List<String[]> xaxis = groupMap.entrySet().stream().map(s -> {
-//                String key = s.getKey();
-//                List<ItemRateValDto> value = s.getValue();
-//                OptionalDouble average = value.stream().mapToDouble(ItemRateValDto::mRate).average();
-//                List<MonthlyTrend> monthlyTrends = TrendDirectionClassifier.analyzeTrendDirection(key, value);
-//                double[] matchRatios = TrendDirectionClassifier.calculateMatchRatios(source, monthlyTrends);
-//                return new String[]{key, String.format("%s|%s",matchRatios[0], (int) matchRatios[2]), String.format("%s|%s",matchRatios[1], (int) matchRatios[3]), String.valueOf(average)};
-//            }).toList();
-//
-//            WidgetResponse.Widget.Supplement.Table table = WidgetResponse.Widget.Supplement.Table.builder()
-//                    .title(StockCategory.LARGE.getDescription())
-//                    .headers(headers)
-//                    .rows(xaxis)
-//                    .build();
-//
-//            tables.add(table);
-//        }
+    private static WidgetResponse.Widget.Supplement.Table createTable(String title, List<String> headers, List<String[]> rows) {
+        return WidgetResponse.Widget.Supplement.Table.builder()
+                .title(title)
+                .headers(headers)
+                .rows(rows)
+                .build();
+    }
 
+    private static List<String[]> get3ItemsByRatio(Map<String, MatchRatios> ratios, TrendDirection direction) {
+        return ratios.entrySet().stream()
+                .sorted(Comparator.comparingDouble((Map.Entry<String, MatchRatios> entry) ->
+                        direction == TrendDirection.UP ? entry.getValue().upMatchRatio() : entry.getValue().downMatchRatio()).reversed())
+                .limit(3)
+                .map(entry -> {
 
+                    String itemName = entry.getKey();
+                    MatchRatios matchRatios = entry.getValue();
+
+                    return direction == TrendDirection.UP ?
+                            new String[]{itemName, String.format("%s|%s", matchRatios.upMatchRatio(), matchRatios.upMatchCount()), String.valueOf(matchRatios.avgMonthlyReturnWhenUp())} :
+                            new String[]{itemName, String.format("%s|%s", matchRatios.downMatchRatio(), matchRatios.downMatchCount()), String.valueOf(matchRatios.avgMonthlyReturnWhenDown())};
+
+                })
+                .collect(Collectors.toList());
     }
 
     public static WidgetResponse.Widget createWidget27Detail(WidgetCreationDto.Entity stockEntity, WidgetCreationDto.Entity financeEntity, String endYearOfPeriod, List<Fs> fsList) {
