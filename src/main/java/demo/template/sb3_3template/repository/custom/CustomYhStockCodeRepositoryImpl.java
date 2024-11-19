@@ -10,6 +10,7 @@ import demo.template.sb3_3template.dto.projection.QStockReturnMkCap;
 import demo.template.sb3_3template.dto.projection.StockReturnMkCap;
 import demo.template.sb3_3template.entity.QNews;
 import demo.template.sb3_3template.entity.Watchlist;
+import demo.template.sb3_3template.entity.mart.QYhStockCode;
 import demo.template.sb3_3template.entity.mart.YhStockCode;
 import demo.template.sb3_3template.entity.mart.YhStockReturnRate;
 import demo.template.sb3_3template.enums.BsnsDays;
@@ -40,7 +41,7 @@ public class CustomYhStockCodeRepositoryImpl implements CustomYhStockCodeReposit
     }
 
     @Override
-    public List<StockCompositeDto> findStockWithIndexAndSector(List<String> stockCodeList) {
+    public List<YhStockCode> findStockWithIndexAndSector(List<String> stockCodeList) {
 
         BooleanBuilder whereClause = new BooleanBuilder();
 
@@ -49,18 +50,9 @@ public class CustomYhStockCodeRepositoryImpl implements CustomYhStockCodeReposit
         }
 
         return queryFactory
-                .select(new QStockCompositeDto(
-                        yhStockCode.stockCd,
-                        yhStockCode.stockNameKr,
-                        yhStockCode.excngId,
-                        infostockTheme.themeNm
-                ))
+                .select(yhStockCode)
                 .from(yhStockCode)
                 .where(whereClause)
-                .leftJoin(infostockThemeStock)
-                .on(yhStockCode.stockCd.eq(infostockThemeStock.stockCd))
-                .leftJoin(infostockTheme)
-                .on(infostockTheme.themeCd.eq(infostockThemeStock.infostockTheme.themeCd))
                 .fetch();
     }
 

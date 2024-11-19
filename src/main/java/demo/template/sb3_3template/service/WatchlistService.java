@@ -7,11 +7,13 @@ import demo.template.sb3_3template.dto.EventOfSectorDto;
 import demo.template.sb3_3template.dto.EventOfStockDto;
 import demo.template.sb3_3template.dto.RateOfReturnDto;
 import demo.template.sb3_3template.dto.StockCompositeDto;
+import demo.template.sb3_3template.dto.projection.StockThemeMkCap;
 import demo.template.sb3_3template.dto.req.WatchlistReq;
 import demo.template.sb3_3template.dto.res.MarketRes;
 import demo.template.sb3_3template.dto.res.UserWatchlistRes;
 import demo.template.sb3_3template.dto.res.WatchlistRes;
 import demo.template.sb3_3template.entity.Watchlist;
+import demo.template.sb3_3template.entity.mart.YhStockCode;
 import demo.template.sb3_3template.entity.mart.infostock.InfostockSectorIndex;
 import demo.template.sb3_3template.entity.mart.YhEcoCode;
 import demo.template.sb3_3template.entity.raw.InfostockTheme;
@@ -26,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -64,8 +67,13 @@ public class WatchlistService {
             case STOCK -> {
 
                 // 전체 종목 리스트 조회 + 종목의 섹터, 종목의 지수
-                List<StockCompositeDto> stockComposite = yhStockCodeRepository.findStockWithIndexAndSector(null);
-                yield MarketRes.fromStockCompositeDto(stockComposite);
+                List<YhStockCode> stockCode = yhStockCodeRepository.findStockWithIndexAndSector(null);
+                List<StockThemeMkCap> stockThemeMkCap = infostockSectorIndexRepository.findStockThemeByMkCap(null);
+
+                Map<String, StockThemeMkCap> stockMainSector = stockThemeMkCap.stream()
+                        .collect(Collectors.toMap(StockThemeMkCap::stockCd, Function.identity(), (v1, v2) -> Double.parseDouble(v1.idxCalMkCap()) > Double.parseDouble(v2.idxCalMkCap()) ? v1 : v2));
+
+                yield MarketRes.fromStockCompositeDto(stockCode, stockMainSector);
 
             }
             case INDEX -> {
@@ -108,8 +116,13 @@ public class WatchlistService {
                 List<String> stockIds = v.stream().map(Watchlist::getItemId).toList();
 
                 // 종목의 지수, 종목의 섹터 구하기
-                List<StockCompositeDto> stockWithIndexAndSector = yhStockCodeRepository.findStockWithIndexAndSector(stockIds);
-                Map<String, StockCompositeDto> stockMap = stockWithIndexAndSector.stream().collect(Collectors.toMap(StockCompositeDto::stockId, stock -> stock));
+                List<YhStockCode> stockCode = yhStockCodeRepository.findStockWithIndexAndSector(stockIds);
+                List<StockThemeMkCap> stockThemeMkCap = infostockSectorIndexRepository.findStockThemeByMkCap(stockIds);
+
+                Map<String, StockThemeMkCap> stockMainSector = stockThemeMkCap.stream()
+                        .collect(Collectors.toMap(StockThemeMkCap::stockCd, Function.identity(), (v1, v2) -> Double.parseDouble(v1.idxCalMkCap()) > Double.parseDouble(v2.idxCalMkCap()) ? v1 : v2));
+
+//                Map<String, StockCompositeDto> stockMap = stockCode.stream().map(stock -> StockCompositeDto.from(stock, stockMainSector))
 
                 // 이벤트 구하기
                 List<EventOfStockDto> eventOfStock = infostockStockEventRepository.findEventOfStock(stockIds);
@@ -119,7 +132,7 @@ public class WatchlistService {
                 List<RateOfReturnDto> rateOfReturn = yhStockCodeRepository.findStockRateOfReturn(v, DateUtil.getMinusDay(1));
                 Map<String, Integer> rateMap = rateOfReturn.stream().collect(Collectors.toMap(RateOfReturnDto::code, RateOfReturnDto::rateOfReturn));
 
-                v.stream().map(watch -> UserWatchlistRes.from(watch, stockMap, eventMap, rateMap)).forEach(totalWatchlist::add);
+                v.stream().map(watch -> UserWatchlistRes.from(watch, null, eventMap, rateMap)).forEach(totalWatchlist::add);
 
             } else if (k.equalsIgnoreCase(MarketType.INDEX.name())) {
 

@@ -4,6 +4,7 @@ import demo.template.sb3_3template.dto.*;
 import demo.template.sb3_3template.dto.projection.StockReturnMkCap;
 import demo.template.sb3_3template.entity.News;
 import demo.template.sb3_3template.entity.Watchlist;
+import demo.template.sb3_3template.entity.mart.YhStockCode;
 import demo.template.sb3_3template.entity.mart.YhStockReturnRate;
 import demo.template.sb3_3template.enums.BsnsDays;
 import demo.template.sb3_3template.enums.RankType;
@@ -15,7 +16,7 @@ import java.util.Optional;
 
 public interface CustomYhStockCodeRepository {
 
-    List<StockCompositeDto> findStockWithIndexAndSector(List<String> stockCodeList);
+    List<YhStockCode> findStockWithIndexAndSector(List<String> stockCodeList);
 
     List<RateOfReturnDto> findStockRateOfReturn(List<Watchlist> v, String targetDate);
 

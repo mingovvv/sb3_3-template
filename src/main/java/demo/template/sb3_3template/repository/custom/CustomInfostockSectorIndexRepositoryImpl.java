@@ -1,13 +1,13 @@
 package demo.template.sb3_3template.repository.custom;
 
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import demo.template.sb3_3template.dto.QRateOfReturnDto;
 import demo.template.sb3_3template.dto.RateOfReturnDto;
-import demo.template.sb3_3template.dto.projection.IndexReturnCountry;
-import demo.template.sb3_3template.dto.projection.SectorReturn;
-import demo.template.sb3_3template.dto.projection.StockReturnMkCap;
+import demo.template.sb3_3template.dto.projection.*;
 import demo.template.sb3_3template.entity.Watchlist;
 import demo.template.sb3_3template.entity.mart.infostock.InfostockSectorIndex;
 import demo.template.sb3_3template.enums.RankType;
@@ -19,6 +19,7 @@ import java.util.*;
 import static demo.template.sb3_3template.entity.mart.QYhMarket.yhMarket;
 import static demo.template.sb3_3template.entity.mart.QYhStockCode.yhStockCode;
 import static demo.template.sb3_3template.entity.mart.infostock.QInfostockSectorIndex.infostockSectorIndex;
+import static demo.template.sb3_3template.entity.mart.infostock.QInfostockThemeStockMaster.infostockThemeStockMaster;
 
 
 public class CustomInfostockSectorIndexRepositoryImpl implements CustomInfostockSectorIndexRepository{
@@ -134,6 +135,28 @@ public class CustomInfostockSectorIndexRepositoryImpl implements CustomInfostock
 
         return sectorReturnMap;
 
+    }
+
+    @Override
+    public List<StockThemeMkCap> findStockThemeByMkCap(List<String> stockCodeList) {
+
+        BooleanBuilder whereClause = new BooleanBuilder();
+
+        if (stockCodeList != null && !stockCodeList.isEmpty()) {
+            whereClause.and(yhStockCode.stockCd.in(stockCodeList));
+        }
+
+        return queryFactory
+                .select(new QStockThemeMkCap(
+                        infostockThemeStockMaster.stockCd,
+                        infostockThemeStockMaster.themeNm,
+                        infostockSectorIndex.idxCalMkCap
+                ))
+                .from(infostockThemeStockMaster)
+                .join(infostockSectorIndex)
+                    .on(infostockThemeStockMaster.themeCd.eq(infostockSectorIndex.themeCd))
+                .where(infostockSectorIndex.stdDt.eq(JPAExpressions.select(infostockSectorIndex.stdDt.max()).from(infostockSectorIndex)).and(whereClause))
+                .fetch();
     }
 
 }

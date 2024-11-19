@@ -33,7 +33,7 @@ public class WatchlistController {
     @ApiResponse(responseCode = "200", description = "HTTP Status Code is 200")
     @GetMapping("/marketlist")
     public BaseResponse<MarketRes> getMarketList(
-            @RequestParam @Parameter(description = "조회 유형(STOCK, INDEX, SECTOR)", example = "SECTOR") @Valid MarketType type
+            @RequestParam("type") @Parameter(description = "조회 유형(STOCK, INDEX, SECTOR)", example = "SECTOR") @Valid MarketType type
     ) {
         return BaseResponseFactory.create(watchlistService.getMarketList(type));
     }

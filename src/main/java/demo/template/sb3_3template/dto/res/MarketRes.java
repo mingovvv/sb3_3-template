@@ -1,6 +1,8 @@
 package demo.template.sb3_3template.dto.res;
 
 import demo.template.sb3_3template.dto.StockCompositeDto;
+import demo.template.sb3_3template.dto.projection.StockThemeMkCap;
+import demo.template.sb3_3template.entity.mart.YhStockCode;
 import demo.template.sb3_3template.entity.mart.infostock.InfostockSectorIndex;
 import demo.template.sb3_3template.entity.mart.YhEcoCode;
 import demo.template.sb3_3template.entity.raw.InfostockTheme;
@@ -10,6 +12,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 public record MarketRes(
 
@@ -54,12 +58,15 @@ public record MarketRes(
                                .build();
                 }
 
-                public static MarketObject fromStockCompositeDto(StockCompositeDto stockCompositeDto) {
+                public static MarketObject fromStockCompositeDto(YhStockCode stockCode, Map<String, StockThemeMkCap> stockMainSector) {
+
                         return MarketObject.builder()
-                                .itemId(stockCompositeDto.stockId())
-                                .itemName(stockCompositeDto.stockName())
-                                .index(IndexKrType.findByExcngId(stockCompositeDto.indexOfStock()).name())
-                                .sector(stockCompositeDto.sectorOfStock())
+                                .itemId(stockCode.getStockCd())
+                                .itemName(stockCode.getStockNameKr())
+                                .index(IndexKrType.findByExcngId(stockCode.getExcngId()).name())
+                                .sector(Optional.ofNullable(stockMainSector.get(stockCode.getStockCd()))
+                                        .map(StockThemeMkCap::themeNm)
+                                        .orElse(null))
                                 .build();
                 }
 
@@ -74,8 +81,8 @@ public record MarketRes(
                         return yhEcoCodeList.stream().map(MarketObject::fromYhEcoCode).toList();
                 }
 
-                public static List<MarketObject> fromStockCompositeDto(List<StockCompositeDto> stockComposite) {
-                        return stockComposite.stream().map(MarketObject::fromStockCompositeDto).toList();
+                public static List<MarketObject> fromStockCompositeDto(List<YhStockCode> stockCode, Map<String, StockThemeMkCap> stockMainSector) {
+                        return stockCode.stream().map(stock -> fromStockCompositeDto(stock, stockMainSector)).toList();
                 }
 
                 public static List<MarketObject> fromInfostockSectorIndex(List<InfostockTheme> sectors) {
@@ -99,10 +106,10 @@ public record MarketRes(
                         .build();
         }
 
-        public static MarketRes fromStockCompositeDto(List<StockCompositeDto> stockComposite) {
+        public static MarketRes fromStockCompositeDto(List<YhStockCode> stockCode, Map<String, StockThemeMkCap> stockMainSector) {
                 return MarketRes.builder()
                         .marketCode(MarketType.STOCK.name())
-                        .marketObjects(MarketObject.fromStockCompositeDto(stockComposite))
+                        .marketObjects(MarketObject.fromStockCompositeDto(stockCode, stockMainSector))
                         .build();
         }
 

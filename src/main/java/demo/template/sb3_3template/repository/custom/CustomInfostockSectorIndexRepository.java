@@ -2,6 +2,7 @@ package demo.template.sb3_3template.repository.custom;
 
 import demo.template.sb3_3template.dto.RateOfReturnDto;
 import demo.template.sb3_3template.dto.projection.SectorReturn;
+import demo.template.sb3_3template.dto.projection.StockThemeMkCap;
 import demo.template.sb3_3template.entity.Watchlist;
 import demo.template.sb3_3template.entity.mart.infostock.InfostockSectorIndex;
 import demo.template.sb3_3template.enums.RankType;
@@ -16,5 +17,7 @@ public interface CustomInfostockSectorIndexRepository {
     List<InfostockSectorIndex> findByThemeNmAndStdDtGoe(String sectorNm, String stdDt);
 
     Map<RankType, List<SectorReturn>> findSectorBy(String start, String end);
+
+    List<StockThemeMkCap> findStockThemeByMkCap(List<String> stockCodeList);
 
 }
