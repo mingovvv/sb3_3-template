@@ -76,4 +76,17 @@ public class Fs {
         private String quarter;
     }
 
+    public Fs(FsCode fsCode, String acctStd, String fsType, String acctCd, String industry, String cumType, String stockCd, String fsDt, String quarter, BigDecimal data, Double yoyPer) {
+        this.fsCode = fsCode;
+        this.acctStd = acctStd;
+        this.fsType = fsType;
+        this.acctCd = acctCd;
+        this.industry = industry;
+        this.cumType = cumType;
+        this.stockCd = stockCd;
+        this.fsDt = fsDt;
+        this.quarter = quarter;
+        this.data = data;
+        this.yoyPer = yoyPer;
+    }
 }

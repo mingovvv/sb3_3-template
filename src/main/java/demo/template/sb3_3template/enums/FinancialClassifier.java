@@ -5,6 +5,7 @@ import lombok.Getter;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -111,6 +112,15 @@ public enum FinancialClassifier {
 
             default:
                 throw new UnsupportedOperationException("지원되지 않는 GraphType: " + type);
+        }
+    }
+
+    public static String calculateYoYGrowthRate(boolean isPer, Fs previousYearFs, Fs currentYearFs) {
+        if (isPer) {
+            return String.valueOf(currentYearFs.getYoyPer());
+        } else {
+            BigDecimal diff = currentYearFs.getData().subtract(previousYearFs.getData());
+            return String.valueOf(diff.divide(previousYearFs.getData(), 4, RoundingMode.HALF_UP).multiply(BigDecimal.valueOf(100)));
         }
     }
 
