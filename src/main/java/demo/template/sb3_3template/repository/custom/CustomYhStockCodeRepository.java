@@ -1,5 +1,6 @@
 package demo.template.sb3_3template.repository.custom;
 
+import demo.template.common.annotation.TrackQueries;
 import demo.template.sb3_3template.dto.*;
 import demo.template.sb3_3template.dto.projection.StockReturnMkCap;
 import demo.template.sb3_3template.entity.News;
@@ -16,6 +17,7 @@ import java.util.Optional;
 
 public interface CustomYhStockCodeRepository {
 
+    @TrackQueries
     List<YhStockCode> findStockWithIndexAndSector(List<String> stockCodeList);
 
     List<RateOfReturnDto> findStockRateOfReturn(List<Watchlist> v, String targetDate);
