@@ -6,6 +6,7 @@ import demo.template.sb3_3template.dto.NewsProjection;
 import demo.template.sb3_3template.dto.StockWithMaxThemeDto;
 import demo.template.sb3_3template.entity.News;
 import demo.template.sb3_3template.entity.Watchlist;
+import demo.template.sb3_3template.entity.mart.YhStockCode;
 import demo.template.sb3_3template.entity.mart.YhStockReturnRate;
 import demo.template.sb3_3template.repository.WatchlistRepository;
 import demo.template.sb3_3template.repository.mart.YhMarketRepository;
@@ -44,6 +45,8 @@ public class TestController {
     public String test() {
 //        List<StockWithMaxThemeDto> stocksWithMaxCapTheme = yhStockCodeRepository.getStocksWithMaxCapTheme();
         List<NewsProjection> news = yhStockCodeRepository.getTopNewsNative();
+        List<Watchlist> watchlist = watchlistRepository.findByUserId("min");
+        Optional<YhStockCode> byStockCd = yhStockCodeRepository.findByStockCd("000020");
         return JsonUtil.toJson(news);
     }
 

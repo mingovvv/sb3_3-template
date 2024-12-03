@@ -1,5 +1,6 @@
 package demo.template.sb3_3template.repository;
 
+import demo.template.common.annotation.TrackQueries;
 import demo.template.sb3_3template.entity.Watchlist;
 import demo.template.sb3_3template.repository.custom.CustomWatchlistRepository;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,6 +12,7 @@ import java.util.Optional;
 
 public interface WatchlistRepository extends JpaRepository<Watchlist, Long>, CustomWatchlistRepository {
 
+    @TrackQueries
     List<Watchlist> findByUserId(String userId);
 
     Optional<Watchlist> findByUserIdAndTypeCodeAndItemId(String userId, String marketCode, String itemId);

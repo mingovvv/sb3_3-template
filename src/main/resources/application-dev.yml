@@ -49,3 +49,5 @@ key:
   mariadb-password: aa
   mariadb-port: aa
   mariadb-db: aa
+
+enable-logging: asdsad

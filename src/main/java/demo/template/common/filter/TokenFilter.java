@@ -1,5 +1,7 @@
 package demo.template.common.filter;
 
+import demo.template.common.aop.Track;
+import demo.template.common.aop.TrackQueriesAspect;
 import demo.template.common.utils.HmacUtil;
 import demo.template.sb3_3template.entity.Channel;
 import demo.template.sb3_3template.repository.ChannelRepository;
@@ -9,18 +11,20 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.authentication.session.SessionAuthenticationException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Base64;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -54,6 +58,15 @@ public class TokenFilter extends OncePerRequestFilter {
 
 //        setAuthentication();
         filterChain.doFilter(request, response);
+
+        System.out.println("=========END===========");
+        List<Track> query = TrackQueriesAspect.getQuery();
+        String collect = query.stream()
+                .map(q -> String.format("[index: %s | elapsed: %d ms | query: %s]", q.getIndex(), q.getElapsedTime(), q.getQuery()))
+                .collect(Collectors.joining("\n"));
+        System.out.println(collect);
+        TrackQueriesAspect.clearIndex();
+        TrackQueriesAspect.clearTrackedQueries();
 
 //        if (AUTH_URI.equals(requestURI)) {
 //

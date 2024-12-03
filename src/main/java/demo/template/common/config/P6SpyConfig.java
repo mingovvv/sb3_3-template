@@ -3,18 +3,26 @@ package demo.template.common.config;
 import com.p6spy.engine.logging.Category;
 import com.p6spy.engine.spy.P6SpyOptions;
 import com.p6spy.engine.spy.appender.MessageFormattingStrategy;
-import demo.template.common.aop.QueryCollector;
 import demo.template.common.aop.TrackQueriesAspect;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.engine.jdbc.internal.FormatStyle;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 
 import java.util.Locale;
 
 @Slf4j
 @Configuration
 public class P6SpyConfig implements MessageFormattingStrategy {
+
+    private static boolean enableLogging;
+
+    @Value("${enable-logging:false}")
+    public void setEnableLogging(boolean enableLogging) {
+        P6SpyConfig.enableLogging = enableLogging;
+    }
 
     @PostConstruct
     public void setLogMessageFormat() {
@@ -26,12 +34,16 @@ public class P6SpyConfig implements MessageFormattingStrategy {
         sql = formatSql(category, sql);
 
         // 특정 스레드에서 repository와 관련된 경우에만 수집
-        if (TrackQueriesAspect.isMethodContextActive()) {
-            log.info("SQL : {}", sql);
-            QueryCollector.addQuery(sql);
+        if (TrackQueriesAspect.isTargetQueryActive()) {
+            TrackQueriesAspect.addQuery(elapsed, sql);
         }
 
-        return String.format("[%s] | %d ms | %s", category, elapsed, formatSql(category, sql));
+        if (enableLogging) {
+            return String.format("[%s] | %d ms | %s", category, elapsed, formatSql(category, sql));
+        } else {
+            return "";
+        }
+
     }
 
     private String formatSql(String category, String sql) {

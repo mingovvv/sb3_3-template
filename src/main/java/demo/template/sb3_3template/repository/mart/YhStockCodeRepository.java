@@ -1,5 +1,6 @@
 package demo.template.sb3_3template.repository.mart;
 
+import demo.template.common.annotation.TrackQueries;
 import demo.template.sb3_3template.dto.NewsDto;
 import demo.template.sb3_3template.dto.NewsProjection;
 import demo.template.sb3_3template.entity.News;
@@ -19,6 +20,7 @@ public interface YhStockCodeRepository extends JpaRepository<YhStockCode, YhStoc
 //    @Query("SELECT y FROM YhStockCode y LEFT JOIN FETCH y.yhStockReturnRates yr WHERE y.stockNameKr = :stockName AND yr.bsnsDays = :bsnsDays AND yr.stdDt = :stdDt")
 //    Optional<YhStockCode> findStockReturnRate(@Param(value = "stockName") String stockName, @Param(value = "bsnsDays") String bsnsDays, @Param(value = "stdDt") String stdDt);
 
+    @TrackQueries
     @Query(value = """
     SELECT ranked.news_id as newsId, 
            ranked.vendor as vendor, 
