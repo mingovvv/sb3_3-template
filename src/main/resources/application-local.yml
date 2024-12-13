@@ -22,6 +22,9 @@ spring:
 
 logging:
   config: classpath:logback-local.xml
+#  level:
+#    org.hibernate.SQL: debug
+#    org.hibernate.orm.jdbc.bind: trace
 
 api:
   inference-pipeline:
@@ -32,4 +35,7 @@ api:
 aes:
   secret-key: 4e6f0d8e28d0f2fa74e6c6d8e38a9f6b
 
-enable-logging: false
+decorator:
+  datasource:
+    p6spy:
+      enable-logging: false

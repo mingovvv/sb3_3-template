@@ -13,7 +13,7 @@ import java.util.Optional;
 public interface WatchlistRepository extends JpaRepository<Watchlist, Long>, CustomWatchlistRepository {
 
     @TrackQueries
-    List<Watchlist> findByUserId(String userId);
+    List<Watchlist> findByUserIdIn(List<String> userId);
 
     Optional<Watchlist> findByUserIdAndTypeCodeAndItemId(String userId, String marketCode, String itemId);
 

@@ -1,19 +1,14 @@
 package demo.template.sb3_3template.controller;
 
 import demo.template.common.utils.JsonUtil;
-import demo.template.sb3_3template.dto.NewsDto;
 import demo.template.sb3_3template.dto.NewsProjection;
-import demo.template.sb3_3template.dto.StockWithMaxThemeDto;
-import demo.template.sb3_3template.entity.News;
 import demo.template.sb3_3template.entity.Watchlist;
 import demo.template.sb3_3template.entity.mart.YhStockCode;
-import demo.template.sb3_3template.entity.mart.YhStockReturnRate;
 import demo.template.sb3_3template.repository.WatchlistRepository;
 import demo.template.sb3_3template.repository.mart.YhMarketRepository;
 import demo.template.sb3_3template.repository.mart.YhStockCodeRepository;
 import demo.template.sb3_3template.repository.mart.YhStockReturnRateRepository;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -45,7 +40,7 @@ public class TestController {
     public String test() {
 //        List<StockWithMaxThemeDto> stocksWithMaxCapTheme = yhStockCodeRepository.getStocksWithMaxCapTheme();
         List<NewsProjection> news = yhStockCodeRepository.getTopNewsNative();
-        List<Watchlist> watchlist = watchlistRepository.findByUserId("min");
+        List<Watchlist> watchlist = watchlistRepository.findByUserIdIn(List.of("jang", "min", "gyu"));
         Optional<YhStockCode> byStockCd = yhStockCodeRepository.findByStockCd("000020");
         return JsonUtil.toJson(news);
     }

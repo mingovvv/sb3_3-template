@@ -1,6 +1,6 @@
 package demo.template.common.filter;
 
-import demo.template.common.aop.Track;
+import demo.template.common.aop.SQLStorage;
 import demo.template.common.aop.TrackQueriesAspect;
 import demo.template.common.utils.HmacUtil;
 import demo.template.sb3_3template.entity.Channel;
@@ -20,10 +20,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Base64;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -59,10 +56,9 @@ public class TokenFilter extends OncePerRequestFilter {
 //        setAuthentication();
         filterChain.doFilter(request, response);
 
-        System.out.println("=========END===========");
-        List<Track> query = TrackQueriesAspect.getQuery();
-        String collect = query.stream()
-                .map(q -> String.format("[index: %s | elapsed: %d ms | query: %s]", q.getIndex(), q.getElapsedTime(), q.getQuery()))
+        Map<Integer, SQLStorage> query = TrackQueriesAspect.getQuery();
+        String collect = query.values().stream()
+                .map(q -> String.format("[index: %s | query: %s | parameters : %s]", q.getIndex(), q.getQuery(), String.join(",", q.getParameters())))
                 .collect(Collectors.joining("\n"));
         System.out.println(collect);
         TrackQueriesAspect.clearIndex();

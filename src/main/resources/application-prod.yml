@@ -23,9 +23,10 @@ spring:
 logging:
   config: classpath:logback-prod.xml
 
-enable-logging: true
-
-
+decorator:
+  datasource:
+    p6spy:
+      enable-logging: false
 
 aes:
   secret-key: 4e6f0d8e28d0f2fa74e6c6d8e38a9f6b

@@ -17,6 +17,16 @@
         </filter>
     </appender>
 
+    <appender name="HIBERNATE_SQL" class="demo.template.common.interceptor.CustomHibernateAppender">
+    </appender>
+
+    <logger name="org.hibernate.SQL" level="DEBUG" additivity="false">
+        <appender-ref ref="HIBERNATE_SQL" />
+    </logger>
+    <logger name="org.hibernate.orm.jdbc.bind" level="TRACE" additivity="false">
+        <appender-ref ref="HIBERNATE_SQL" />
+    </logger>
+
     <logger name="com.zaxxer.hikari" level="INFO" />
 
     <root level="INFO">

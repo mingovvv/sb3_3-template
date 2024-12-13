@@ -9,7 +9,6 @@ import demo.template.sb3_3template.repository.WatchlistRepository;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -47,7 +46,7 @@ public class HomeService {
             recommendations = commonQuestions.stream().map(RecommendQuestion::getQuestion).limit(RECOMMENDATION_LIMIT).toList();
         } else {
 
-            List<Watchlist> watchlist = watchlistRepository.findByUserId(userId);
+            List<Watchlist> watchlist = null;
 
             if (watchlist.isEmpty()) {
                 List<RecommendQuestion> commonQuestions = recommendQuestionRepository.findByCodeAndUseYnTrue("RANDOM");

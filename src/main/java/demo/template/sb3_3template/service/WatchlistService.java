@@ -6,7 +6,6 @@ import demo.template.common.utils.DateUtil;
 import demo.template.sb3_3template.dto.EventOfSectorDto;
 import demo.template.sb3_3template.dto.EventOfStockDto;
 import demo.template.sb3_3template.dto.RateOfReturnDto;
-import demo.template.sb3_3template.dto.StockCompositeDto;
 import demo.template.sb3_3template.dto.projection.StockThemeMkCap;
 import demo.template.sb3_3template.dto.req.WatchlistReq;
 import demo.template.sb3_3template.dto.res.MarketRes;
@@ -104,7 +103,7 @@ public class WatchlistService {
 
         List<UserWatchlistRes> totalWatchlist = new ArrayList<>();
 
-        List<Watchlist> watchlist = watchlistRepository.findByUserId(userId);
+        List<Watchlist> watchlist = null;
 
         // 관심종목 마켓별로 구분
         Map<String, List<Watchlist>> grouped = watchlist.stream().collect(Collectors.groupingBy(Watchlist::getTypeCode));
