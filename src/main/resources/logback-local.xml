@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
 
-    <property name="LOG_PATH" value="./LOG/template" />
+    <property name="LOG_PATH" value="./logs" />
     <property name="LOG_FILE_NAME" value="template_local" />
     <property name="LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] [%-5p] [%method:%line] [uuid=%mdc{REQUEST_UUID:-N/A}] - %msg%n" />
     <property name="TIMEZONE" value="Asia/Seoul" />
@@ -13,7 +13,37 @@
             <charset>UTF-8</charset>
         </encoder>
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-            <level>${LOG_LEVEL}</level>
+            <level>INFO</level>
+        </filter>
+    </appender>
+
+    <appender name="APP-LOG" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_PATH}/app.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_PATH}/app_%d{yyyy-MM-dd}.log </fileNamePattern>
+            <timeZone>${TIMEZONE}</timeZone>
+        </rollingPolicy>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>${LOG_PATTERN}</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>DEBUG</level>
+        </filter>
+    </appender>
+
+    <appender name="ERROR-LOG" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_PATH}/error.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_PATH}/error_%d{yyyy-MM-dd}.log </fileNamePattern>
+            <timeZone>${TIMEZONE}</timeZone>
+        </rollingPolicy>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>${LOG_PATTERN}</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>ERROR</level>
         </filter>
     </appender>
 
@@ -28,6 +58,11 @@
     </logger>
 
     <logger name="com.zaxxer.hikari" level="INFO" />
+
+    <logger name="demo.template" level="DEBUG">
+        <appender-ref ref="APP-LOG" />
+        <appender-ref ref="ERROR-LOG" />
+    </logger>
 
     <root level="INFO">
         <appender-ref ref="CONSOLE" />
